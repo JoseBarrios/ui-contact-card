@@ -13,19 +13,17 @@
 		}
 
 		.container {
-			background-color:#FFF;
-			height:100%;
-			width:100%;
+			border:1px solid #d7d8e1;
 		}
 
 		.header {
 			border-bottom:1px solid #f3f3f5;
 			background-color:#fbfaff;
-			padding-bottom:44px;
+			padding-bottom:66px;
 			padding-right:11px;
 			padding-left:11px;
 			position:relative;
-			padding-top:44px;
+			padding-top:33px;
 			cursor:default;
 			width:100%;
 		}
@@ -38,25 +36,26 @@
 			cursor:pointer;
 			color:#1c7ef8;
 			border:none;
-			height:44px;
-			width:44px;
+			height:66px;
+			width:66px;
 			right:11px;
 			top:11px;
 		}
 
 		.full-name {
 			vertical-align:middle;
+			margin-bottom:10px;
+			margin-top:44px;
 			text-align:center;
 			line-height:1em;
-			font-size:2.2em;
+			font-size:3em;
 			width:100%;
-			padding-top:15px;
 		}
 
 		.last-updated {
 			text-align:center;
 			font-weight:300;
-			font-size:1em;
+			font-size:1.2em;
 			color:#808080;
 		}
 
@@ -95,7 +94,13 @@
 			color:#1c7ef8;
 		}
 
+
+
+
+
+
 		.info-container {
+			background-color:white;
 			cursor:default;
 			padding:44px;
 			width:100%;
@@ -103,12 +108,11 @@
 
 		.info-label {
 			font-size:1.3em;
-			margin-top:44px;
-			margin-bottom:40px;
 		}
 
 		.info-value {
 			padding-bottom:22px;
+			margin-bottom:11px;
 			padding-top:22px;
 			font-size:1.5em;
 			cursor:pointer;
@@ -117,13 +121,13 @@
 
 		.info-divider {
 			border: 1px solid #f3f3f5;
-			margin-bottom:66px;
+			margin-bottom:44px;
 		}
 
 		.emergency-header-text {
 			font-size:1.4em;
 			color:lightGray;
-			margin-top:66px;
+			margin-top:44px;
 			margin-bottom:22px;
 		}
 
@@ -133,386 +137,6 @@
 			font-size:1.5em;
 			cursor:pointer;
 			color:#fc3d39;
-		}
-
-
-		@media screen and (min-width: 414px) and (max-width: 768px) {
-
-			.header {
-				border-bottom:1px solid #f3f3f5;
-				background-color:#fbfaff;
-				padding-bottom:44px;
-				padding-right:11px;
-				padding-left:11px;
-				position:relative;
-				padding-top:44px;
-				cursor:default;
-				width:100%;
-			}
-
-			.edit-button {
-				background-color:transparent;
-				position:absolute;
-				text-align:center;
-				font-size:1.3em;
-				cursor:pointer;
-				color:#1c7ef8;
-				border:none;
-				height:44px;
-				width:44px;
-				right:11px;
-				top:11px;
-			}
-
-			.full-name {
-				vertical-align:middle;
-				text-align:center;
-				line-height:1.5em;
-				font-size:2.9em;
-				width:100%;
-				padding-top:15px;
-			}
-
-			.last-updated {
-				text-align:center;
-				font-weight:300;
-				font-size:1.2em;
-				color:#808080;
-			}
-
-			.action-container {
-				justify-content: center;
-				display: flex;
-			}
-
-			.action-button {
-				background-color:#1c7ef8;
-				border-radius:33px;
-				margin-bottom:33px;
-				margin-right:22px;
-				margin-left:22px;
-				margin-top:33px;
-				cursor:pointer;
-				height:66px;
-				width:66px;
-			}
-
-			.action-icon {
-				vertical-align:middle;
-				text-align:center;
-				line-height:66px;;
-				font-size:33px;
-				color:white;
-				height:66px;
-				width:66px;
-			}
-
-			.action-label {
-				text-align:center;
-				font-size:1.2em;
-				margin-top:10px;
-				cursor:default;
-				color:#1c7ef8;
-			}
-
-			.info-container {
-				cursor:default;
-				padding:44px;
-				width:100%;
-			}
-
-			.info-label {
-				font-size:1.75em;
-				margin-top:22px;
-			}
-
-			.info-value {
-				padding-bottom:22px;
-				padding-top:22px;
-				font-size:1.8em;
-				cursor:pointer;
-				color:#1c7ef8;
-			}
-
-			.info-divider {
-				border: 2px solid #f3f3f5;
-				margin-bottom:66px;
-			}
-
-			.emergency-header-text {
-				font-size:1.75em;
-				color:lightGray;
-				margin-top:88px;
-			}
-
-			.emergency-contact-value {
-				padding-bottom:22px;
-				padding-top:22px;
-				font-size:1.8em;
-				cursor:pointer;
-				color:#fc3d39;
-			}
-
-		}
-
-		@media screen and (min-width: 768px) and (max-width: 1024px) {
-
-			.header {
-				border-bottom:1px solid #f3f3f5;
-				background-color:#fbfaff;
-				padding-bottom:66px;
-				padding-right:22px;
-				padding-left:22px;
-				position:relative;
-				padding-top:77px;
-				cursor:default;
-				width:100%;
-			}
-
-			.edit-button {
-				background-color:transparent;
-				position:absolute;
-				text-align:center;
-				font-size:1.8em;
-				cursor:pointer;
-				color:#1c7ef8;
-				border:none;
-				height:88px;
-				width:88px;
-				right:11px;
-				top:11px;
-			}
-
-			.header-given-name {
-				display:inline-block;
-				padding-right:10px;
-				line-height:88px;
-				text-align:right;
-				font-size:4em;
-				height:88px;
-				float:left;
-				width:50%;
-			}
-
-			.header-family-name {
-				vertical-align:middle;
-				display:inline-block;
-				padding-left:10px;
-				line-height:88px;
-				text-align:left;
-				font-size:4em;
-				height:88px;
-				width:50%;
-			}
-
-			.full-name {
-				vertical-align:middle;
-				text-align:center;
-				line-height:88px;
-				font-size:4em;
-				height:88px;
-				width:100%;
-			}
-
-			.last-updated {
-				text-align:center;
-				font-weight:300;
-				font-size:1.5em;
-				color:#808080;
-			}
-
-			.action-container {
-				justify-content: center;
-				display: flex;
-			}
-
-			.action-button {
-				background-color:#1c7ef8;
-				border-radius:44px;
-				margin-bottom:44px;
-				margin-right:22px;
-				margin-left:22px;
-				margin-top:44px;
-				cursor:pointer;
-				height:88px;
-				width:88px;
-			}
-
-			.action-icon {
-				vertical-align:middle;
-				text-align:center;
-				line-height:88px;;
-				font-size:44px;
-				color:white;
-				height:88px;
-				width:88px;
-			}
-
-			.action-label {
-				text-align:center;
-				font-size:1.5em;
-				margin-top:10px;
-				cursor:default;
-				color:#1c7ef8;
-			}
-
-			.info-container {
-				cursor:default;
-				padding:66px;
-				width:100%;
-			}
-
-			.info-label {
-				font-size:2em;
-				margin-top:22px;
-			}
-
-			.info-value {
-				cursor:pointer;
-				font-size:2.5em;
-				color:#1c7ef8;
-				padding-top:22px;
-				padding-bottom:22px;
-			}
-
-			.info-divider {
-				border: 2px solid #f3f3f5;
-				margin-bottom:66px;
-			}
-
-			.emergency-header-text {
-				margin-bottom:44px;
-				margin-top:88px;
-				color:lightGray;
-				font-size:2em;
-			}
-
-			.emergency-contact-value {
-				cursor:pointer;
-				font-size:2.5em;
-				padding-top:22px;
-				padding-bottom:22px;
-				color:#fc3d39;
-			}
-		}
-
-		@media screen and (min-width: 1024px) {
-
-			.header {
-				border-bottom:1px solid #f3f3f5;
-				background-color:#fbfaff;
-				padding-bottom:66px;
-				padding-right:22px;
-				padding-left:22px;
-				position:relative;
-				padding-top:77px;
-				cursor:default;
-				width:100%;
-			}
-
-			.edit-button {
-				background-color:transparent;
-				position:absolute;
-				text-align:center;
-				font-size:2.4em;
-				cursor:pointer;
-				color:#1c7ef8;
-				border:none;
-				height:88px;
-				width:88px;
-				right:22px;
-				top:22px;
-			}
-
-			.full-name {
-				vertical-align:middle;
-				text-align:center;
-				line-height:120px;
-				font-size:5em;
-				height:120px;
-				width:100%;
-			}
-
-			.last-updated {
-				text-align:center;
-				font-weight:300;
-				font-size:2em;
-				color:#808080;
-			}
-
-			.action-container {
-				justify-content: center;
-				display: flex;
-			}
-
-			.action-button {
-				background-color:#1c7ef8;
-				border-radius:60px;
-				margin-bottom:44px;
-				margin-right:33px;
-				margin-left:33px;
-				margin-top:44px;
-				cursor:pointer;
-				height:120px;
-				width:120px;
-			}
-
-			.action-icon {
-				vertical-align:middle;
-				text-align:center;
-				line-height:120px;;
-				font-size:60px;
-				color:white;
-				height:120px;
-				width:120px;
-			}
-
-			.action-label {
-				text-align:center;
-				font-size:2em;
-				margin-top:10px;
-				cursor:default;
-				color:#1c7ef8;
-			}
-
-			.info-container {
-				cursor:default;
-				padding:66px;
-				width:100%;
-			}
-
-			.info-label {
-				font-size:3em;
-				margin-top:22px;
-			}
-
-			.info-value {
-				cursor:pointer;
-				font-size:3.3em;
-				color:#1c7ef8;
-				padding-top:22px;
-				padding-bottom:22px;
-			}
-
-			.info-divider {
-				border: 2px solid #f3f3f5;
-				margin-bottom:66px;
-			}
-
-			.emergency-header-text {
-				margin-bottom:44px;
-				margin-top:88px;
-				color:lightGray;
-				font-size:4em;
-			}
-
-			.emergency-contact-value {
-				cursor:pointer;
-				font-size:3.3em;
-				padding-top:22px;
-				margin-bottom:44px;
-				color:#fc3d39;
-			}
 		}
 
 
