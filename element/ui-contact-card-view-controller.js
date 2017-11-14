@@ -54,8 +54,9 @@ class UIContactCard extends HTMLElement {
 			}
 		});
 
-    //READY
+    //READY, RENDER
     this.state.connected = true;
+  	this._updateRendering();
   }
 
   adoptedCallback(){
@@ -63,7 +64,7 @@ class UIContactCard extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.state.connected = true;
+    this.state.connected = false;
     console.log('disconnected');
   }
 
@@ -92,6 +93,8 @@ class UIContactCard extends HTMLElement {
   }
 
   _updateRendering() {
+		//Only render if we're connected, and have a model. Otherwise it's a waste
+		//of time
     if(!this.state.connected || !this.person){ return; }
     this.$fullName.innerHTML = `${this.person.givenName} ${this.person.familyName}`;
     this.$lastUpdated.innerHTML = 'Statically updated';
@@ -102,6 +105,13 @@ class UIContactCard extends HTMLElement {
       this.$emergencyContactTelephone = this.person.knows[0].telephone;
     }
   }
+
+
+
+
+
+
+
 
   editing(e){ console.log('EDITING', e); }
 

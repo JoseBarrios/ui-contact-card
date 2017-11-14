@@ -10,7 +10,7 @@
 <body style="padding:0px;margin:0px;width:100%;height:100%;background-color:#e8ebf2">
 
 	<div style="width:40%;margin:22px;">
-		<ui-contact-card></ui-contact-card>
+		<ui-contact-card person='{"_id":"5a066def74fbd5c7f4e9f597","givenName":"Jon","familyName":"Bowen","email":"updated@email.com","telephone":"2505888968","knows":[{"givenName":"Camille","familyName":"Graham","email":"camille@barrios.io","telephone":"2505888968"}]}'></ui-contact-card>
 	</div>
 
 	<div style="width:30%;margin-top:22px; position:absolute;top:0px;left:45%">
@@ -50,7 +50,7 @@
 		let contactCards = document.querySelectorAll('ui-contact-card');
 		contactCards.forEach(contactCard => {
 			contactCard.addEventListener('update', e=> { console.log('UPDATE', e); });
-			contactCard.setAttribute('person', model);
+			//contactCard.setAttribute('person', model);
 		})
 
 	});
