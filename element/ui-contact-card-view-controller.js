@@ -104,7 +104,39 @@ class UIContactCard extends HTMLElement {
       this.$emergencyContactName.innerHTML = `${emergencyGivenName} ${emergencyFamilyName}`
       this.$emergencyContactTelephone = this.person.knows[0].telephone;
     }
+		this.visible = true;
   }
+
+
+	get visible(){ return this.state.visible; }
+	set visible(value){
+		//if the state already matches, return
+		let display = value;
+		let hide = !display;
+		var type = null;
+
+		let fade = (e) => {
+			var step = type === 'in'? 0.1 : -0.1;
+			var target = type === 'in'? 1 : 0;
+			var current = parseFloat(this.$container.style.opacity);
+			let progress = current + step;
+			this.$container.style.opacity = progress;
+			if(progress !== target){ requestAnimationFrame(fade) }
+		}
+
+		if(display){
+			//set initial state
+			this.$container.style.opacity = 0;
+			type = 'in';
+			fade();
+		}
+		else if(hide){
+			//set initial state
+			this.$container.style.opacity = 1;
+			type = 'out';
+			fade()
+		}
+	}
 
 
 
