@@ -7,6 +7,9 @@
 
 		* {
 			font-family:'Roboto',sans-serif;
+		}
+
+		.host {
 			box-sizing:border-box;
 			padding:0px;
 			margin:0px;
@@ -143,39 +146,39 @@
 	</style>
 
 
-	<div class="container">
-		<div class="header">
-			<button id="editButton" class="edit-button">Edit</button>
-			<h1 id="fullName" class="full-name">First Last</h1>
-			<p id="lastUpdated" class="last-updated">Last Updated</p>
+	<div class="host container">
+		<div class="host header">
+			<button id="editButton" class="host edit-button">Edit</button>
+			<h1 id="fullName" class="host full-name">First Last</h1>
+			<p id="lastUpdated" class="host last-updated">Last Updated</p>
 
 			<!--ACTION MENU-->
-			<div class="action-container">
-				<div id="telephoneActionButton" class="action-button">
-					<span id="telephoneIcon" class="action-icon fa fa-phone fa-2x"></span>
-					<p id="telephoneActionLabel" class="action-label">home</p>
+			<div class="host action-container">
+				<div id="telephoneActionButton" class="host action-button">
+					<span id="telephoneIcon" class="host action-icon fa fa-phone fa-2x"></span>
+					<p id="telephoneActionLabel" class="host action-label">home</p>
 				</div>
-				<div id="emailActionButton" class="action-button">
-					<span id="emailIcon" class="action-icon fa fa-envelope fa-2x"></span>
-					<p id="emailActionLabel" class="action-label">email</p>
+				<div id="emailActionButton" class="host action-button">
+					<span id="emailIcon" class="host action-icon fa fa-envelope fa-2x"></span>
+					<p id="emailActionLabel" class="host action-label">email</p>
 				</div>
 			</div>
 		</div>
 
 		<!--INFO-->
-		<div id="contactInfoContainer" class="info-container">
+		<div id="contactInfoContainer" class="host info-container">
 
-			<p class="info-label">phone</p>
-			<p id="telephone" class="info-value">+1 (234) 567-8901</p>
-			<div class="info-divider"></div>
+			<p class="host info-label">phone</p>
+			<p id="telephone" class="host info-value">+1 (234) 567-8901</p>
+			<div class="host info-divider"></div>
 
-			<p class="info-label">email</p>
-			<p id="email" class="info-value">email@email.com</p>
-			<div class="info-divider"></div>
+			<p class="host info-label">email</p>
+			<p id="email" class="host info-value">email@email.com</p>
+			<div class="host info-divider"></div>
 
-			<p class="emergency-header-text">Emergency Contact</p>
-			<p id="emergencyContactName" class="info-label">First Last</p>
-			<p id="emergencyContactTelephone" class="emergency-contact-value"> +1 (123) 456-6789</p>
+			<p class="host emergency-header-text">Emergency Contact</p>
+			<p id="emergencyContactName" class="host info-label">First Last</p>
+			<p id="emergencyContactTelephone" class="host emergency-contact-value"> +1 (123) 456-6789</p>
 		</div>
 	</div>
 </template>
