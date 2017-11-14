@@ -1,0 +1,41 @@
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.17/webcomponents-loader.js'></script>
+<link rel='import' href='../element/index.html'>
+
+
+<meta name=viewport content="width=device-width, initial-scale=1">
+
+<body style="padding:0px;margin:0px;width:100%;height:100%;">
+	<div style="width:100%">
+		<ui-contact-card></ui-contact-card>
+	</div>
+</body>
+
+<script>
+
+	window.addEventListener('WebComponentsReady', function(e) {
+		let camille = {};
+		camille.givenName = 'Camille';
+		camille.familyName = 'Barrios';
+		camille.email = 'camille@barrios.io';
+		camille.telephone = '12061234567';
+
+		let jose = {};
+		jose.givenName = 'Jose';
+		jose.familyName = 'Barrios';
+		jose.email = 'jose@barrios.io';
+		jose.telephone = '12505888968';
+		jose.knows = [];
+		jose.knows.push(camille);
+
+		let contactCard = document.querySelector('ui-contact-card');
+		contactCard.addEventListener('update', e=> {
+			console.log('UPDATE', e);
+		});
+
+		contactCard.setAttribute('person', JSON.stringify(jose));
+
+	});
+</script>
