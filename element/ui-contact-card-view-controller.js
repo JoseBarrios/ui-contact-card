@@ -60,6 +60,7 @@ class UIContactCard extends HTMLElement {
     //READY, RENDER
     this.state.connected = true;
   	this._updateRendering();
+		this.visible = true;
   }
 
   adoptedCallback(){
@@ -111,7 +112,6 @@ class UIContactCard extends HTMLElement {
       this.$emergencyContactName.innerHTML = `${emergencyGivenName} ${emergencyFamilyName}`
       this.$emergencyContactTelephone.innerHTML = this.person.knows[0].telephone;
     }
-		this.visible = true;
   }
 
 
@@ -123,7 +123,7 @@ class UIContactCard extends HTMLElement {
 		var type = null;
 
 		let fade = (e) => {
-			var step = type === 'in'? 0.01 : -0.01;
+			var step = type === 'in'? 0.03 : -0.03;
 			var target = type === 'in'? 1 : 0;
 			var current = parseFloat(this.$container.style.opacity);
 			let progress = current + step;
