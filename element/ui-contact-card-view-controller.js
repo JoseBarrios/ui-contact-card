@@ -30,7 +30,7 @@ class UIContactCard extends HTMLElement {
     this.$telephoneIcon = this.shadowRoot.querySelector('#telephoneIcon');
     this.$emailActionButton = this.shadowRoot.querySelector('#emailActionButton');
     this.$emailIcon = this.shadowRoot.querySelector('#emailIcon');
-    this.$telephoneNumber = this.shadowRoot.querySelector('#telephone');
+    this.$telephone = this.shadowRoot.querySelector('#telephone');
     this.$email = this.shadowRoot.querySelector('#email');
     this.$emergencyContactName = this.shadowRoot.querySelector('#emergencyContactName');
     this.$emergencyContactTelephone = this.shadowRoot.querySelector('#emergencyContactTelephone');
@@ -39,14 +39,17 @@ class UIContactCard extends HTMLElement {
     this.$editButton.addEventListener('click', this.editing.bind(this))
     this.$emailActionButton.addEventListener('click', this.emailing.bind(this))
     this.$email.addEventListener('click', this.emailing.bind(this));
+
     this.$telephoneActionButton.addEventListener('click', e => {
 			e.telephone = this.person.telephone;
       this.calling(e);
     });
-		this.$telephoneNumber.addEventListener('click', e => {
+
+		this.$telephone.addEventListener('click', e => {
 			e.telephone = this.person.telephone;
       this.calling(e);
 		});
+
 		this.$emergencyContactTelephone.addEventListener('click', e => {
 			if(this.person.knows.length){
 				e.telephone = this.person.knows[0].telephone;
@@ -98,11 +101,15 @@ class UIContactCard extends HTMLElement {
     if(!this.state.connected || !this.person){ return; }
     this.$fullName.innerHTML = `${this.person.givenName} ${this.person.familyName}`;
     this.$lastUpdated.innerHTML = 'Statically updated';
+    this.$email.innerHTML = this.person.email;
+    this.$telephone.innerHTML = this.person.telephone;
+		console.log(this.person.knows.length)
     if(this.person.knows.length){
+			console.log(this.person.knows[0])
       let emergencyGivenName = this.person.knows[0].givenName;
       let emergencyFamilyName = this.person.knows[0].familyName;
       this.$emergencyContactName.innerHTML = `${emergencyGivenName} ${emergencyFamilyName}`
-      this.$emergencyContactTelephone = this.person.knows[0].telephone;
+      this.$emergencyContactTelephone.innerHTML = this.person.knows[0].telephone;
     }
 		this.visible = true;
   }
@@ -116,7 +123,7 @@ class UIContactCard extends HTMLElement {
 		var type = null;
 
 		let fade = (e) => {
-			var step = type === 'in'? 0.1 : -0.1;
+			var step = type === 'in'? 0.01 : -0.01;
 			var target = type === 'in'? 1 : 0;
 			var current = parseFloat(this.$container.style.opacity);
 			let progress = current + step;
