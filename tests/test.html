@@ -8,9 +8,17 @@
 
 
 <body style="padding:0px;margin:0px;width:100%;height:100%;background-color:#e8ebf2">
-	<div style="width:90%;margin:5%;margin-top:2.5%;float:left">
-		<ui-contact-card edit="true"></ui-contact-card>
+	<div style="width:50%;margin:25%;margin-top:2.5%;float:left">
+		<ui-contact-card id="interactiveCard" ></ui-contact-card>
 	</div>
+
+	<div style="width:40%;margin:5%;margin-top:2.5%;float:left">
+		<ui-contact-card id="card" ></ui-contact-card>
+	</div>
+	<div style="width:40%;margin:5%;margin-top:2.5%;float:left">
+		<ui-contact-card id="editableCard" edit="true"></ui-contact-card>
+	</div>
+
 </body>
 
 
@@ -22,38 +30,35 @@
 
 		let camille = {};
 		camille.givenName = 'camille';
+		camille.familyName = 'barrios';
 		camille.telephone = '2061234567';
 		camille.email = "camille@email.com";
-
-		let sahand = {};
-		sahand.familyName = 'saba';
-		sahand.email = "sahand@email.com";
-
-		let dylan = {};
-		dylan.givenName = 'dylan';
-		dylan.familyName = 'hardie';
-		dylan.telephone = '2504545555';
-
-		let kelly = {};
-		kelly.givenName = 'kelly';
-		kelly.telephone = '9897873432';
-		kelly.email = "kelly@email.com";
 
 		let jose = {};
 		jose.givenName = 'jose';
 		jose.familyName = 'barrios';
-		jose.email = 'Jose@Barrios.Io';
 		jose.telephone = '2505888968';
 
+
+		let sahand = {};
+		sahand.givenName = 'sahand';
+		sahand.familyName = 'saba';
+
+		let dylan = {};
+		dylan.givenName = 'dylan';
+
 		let blank = {};
+
+		let empty = null;
 
 		var people = [];
 		people.push(jose);
 		people.push(camille);
 		people.push(sahand);
 		people.push(dylan);
-		people.push(kelly);
 		people.push(blank);
+		people.push(blank);
+		//people.push(empty);
 
 		function getRandom(array) {
 			let randomIndex = Math.floor(Math.random() * (array.length)) + 0;
@@ -61,13 +66,25 @@
 			return JSON.parse(JSON.stringify(person));
 		}
 
-		let contactCard = document.querySelector('ui-contact-card');
-		contactCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
+		let interactiveCard = document.querySelector('#interactiveCard');
+		let card = document.querySelector('#card');
+		let editableCard = document.querySelector('#editableCard');
+
+		//TODO
+		card.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
+		editableCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
 
 		let update = getRandom(people);
 		update.knows = getRandom(people);
-		contactCard.setAttribute('person', JSON.stringify(update));
+		interactiveCard.setAttribute('person', JSON.stringify(update));
 
+		update = getRandom(people);
+		update.knows = getRandom(people);
+		card.setAttribute('person', JSON.stringify(update));
+
+		update = getRandom(people)
+		update.knows = getRandom(people);
+		editableCard.setAttribute('person', JSON.stringify(update));
 
 		setInterval(e => {
 			var people = [];
@@ -75,13 +92,18 @@
 			people.push(camille);
 			people.push(sahand);
 			people.push(dylan);
-			people.push(kelly);
+			people.push(blank);
 			people.push(blank);
 
 			let update = getRandom(people);
-			update.knows = [];
-			update.knows.push(getRandom(people));
-			contactCard.setAttribute('person', JSON.stringify(update));
-		}, 1000)
+			update.knows = getRandom(people);
+			card.setAttribute('person', JSON.stringify(update));
+
+			update = getRandom(people)
+			update.knows = getRandom(people);
+			editableCard.setAttribute('person', JSON.stringify(update));
+
+		}, 2000)
+
 	});
 </script>

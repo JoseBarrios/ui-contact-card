@@ -89,8 +89,13 @@ class UIContactCard extends HTMLElement {
 		this.model.person = value;
 		this.meta = this.model.person.meta;
 		this.waitForConnection().then(connected => {
-			this._populateViewFields();
-			this._populateEditorFields();
+			if(this.editing){
+				this._populateEditorFields();
+				this._renderEditor();
+			} else {
+				this._populateViewFields();
+				this._renderMainView();
+			}
 		})
 	}
 
@@ -98,7 +103,6 @@ class UIContactCard extends HTMLElement {
 	set editing(isEditing){
 		this.state.editing = isEditing;
 		let isNotEditing = !isEditing;
-
 		if(isEditing){
 			this.waitForConnection().then(connected => {
 				this._clearEditorErrors();
@@ -147,6 +151,7 @@ class UIContactCard extends HTMLElement {
 	}
 
 	set updatedOn(date){
+		console.log('UPDATED ON UPDATED')
 		this.meta.updatedOn = parseInt(date);
 		this._renderTimer();
 	}
@@ -189,7 +194,13 @@ class UIContactCard extends HTMLElement {
 
 	get emergencyContact(){
 		let hasEmergencyContact = this.person.knows && this.person.knows.length;
-		return hasEmergencyContact? this.person.knows[0] : {};
+		let doesNotHaveEmergencyContact = !hasEmergencyContact;
+		//If it doesn't have one, add it
+		if(doesNotHaveEmergencyContact){
+			this.person.knows = [];
+			this.person.knows.push({});
+		}
+		return this.person.knows[0];
 	}
 
 	get emergencyGivenName(){
@@ -249,15 +260,14 @@ class UIContactCard extends HTMLElement {
 		this._initViewReferences();
 		this._initEventListeners();
 
-		this._populateEditorFields();
-		this._renderEditor(this.editing);
-
 		this._populateViewFields();
+		this._populateEditorFields();
+
+		this._renderEditor(this.editing);
 		this._renderMainView(!this.editing);
 		//Updates view minute
 		this.liveRendering = setInterval(e => {
 			this._renderTimer();
-			console.log('rendering', this.meta)
 		}, 60000);
 		this.connected = true;
 	}
@@ -352,6 +362,7 @@ class UIContactCard extends HTMLElement {
 				e.email = this.email;
 				this._email(e);
 			}
+			else { this._renderEditor(); }
 		});
 
 		this.$email.addEventListener('click', e => {
@@ -368,6 +379,7 @@ class UIContactCard extends HTMLElement {
 				e.telephone = this.person.telephone;
 				this._call(e);
 			}
+			else { this._renderEditor(); }
 		});
 
 		this.$fullNameView.addEventListener('click', e => {
@@ -405,13 +417,6 @@ class UIContactCard extends HTMLElement {
 
 	_populateViewFields(){
 		this.$fullNameHeader.innerHTML = this.fullName || "New Contact";
-
-		if(this.hasName){
-			this.$fullNameView.classList.add('hide-view');
-		} else {
-			this.$fullNameView.classList.remove('hide-view');
-		}
-
 		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 		this.$email.innerHTML = this.email || 'add email';
 		this.$telephone.innerHTML = this.telephone || 'add number';
@@ -424,7 +429,6 @@ class UIContactCard extends HTMLElement {
 			this.$emergencyFullName.innerHTML = this.emergencyFullName || '';
 			this.$emergencyTelephone.innerHTML = this.emergencyTelephone || 'add number';
 		} else {
-			console.log('hasEmergencyContact returned false')
 			this.$addEmergencyContactButton.classList.remove('hide-view');
 			this.$emergencyTelephone.classList.add('hide-view');
 			this.$emergencyFullName.classList.add('hide-view');
@@ -433,7 +437,7 @@ class UIContactCard extends HTMLElement {
 	}
 
 	//CHANGE SHOW VAR NAME, IT"S CONFUSING
-	_renderEditor(show){
+	_renderEditor(show=true){
 		let activeHeader = show? 'active-header' : 'inactive-header';
 		let inactiveHeader = show? 'inactive-header' : 'active-header';
 		this.$fullNameHeader.classList.add(inactiveHeader);
@@ -476,10 +480,14 @@ class UIContactCard extends HTMLElement {
 		this.$deleteButton.classList.add(addClass);
 		this.$deleteButton.classList.remove(removeClass);
 		//Hidden (removes from layout)
-		this.$addEmergencyContactButton.hidden = show;;
+		this.$addEmergencyContactButton.hidden = show;
+
+		this.$fullNameView.classList.remove('show-view');
+		this.$fullNameView.classList.add('hide-view');
 	}
 
 	_populateEditorFields(){
+		this.$fullNameHeader.innerHTML = this.hasName? this.fullName : 'New Contact';
 		this.$givenNameInput.value = this.givenName || '';
 		this.$familyNameInput.value = this.familyName || '';
 		this.$telephoneInput.value = this.telephone || '';
@@ -492,11 +500,10 @@ class UIContactCard extends HTMLElement {
 	}
 
 	_clearEditorErrors(){
-		console.log('CALLING CLEAR ERRORS')
 		this.$telephoneInput.classList.remove('error-input');
 	}
 
-	_renderMainView(show){
+	_renderMainView(show=true){
 		//If show is true, add class is show-view
 		let addClass = show? 'show-view' : 'hide-view';
 		//If show is false, add class is hide-view
@@ -511,6 +518,16 @@ class UIContactCard extends HTMLElement {
 		this.$emergencyTelephoneView.classList.remove(removeClass);
 		this.$editButton.classList.add(addClass);
 		this.$editButton.classList.remove(removeClass);
+
+		if(this.hasName){
+			this.$fullNameView.classList.add('hide-view');
+			this.$fullNameView.classList.remove('show-view');
+		}
+		//No name contact
+		else {
+			this.$fullNameView.classList.add('show-view');
+			this.$fullNameView.classList.remove('hide-view');
+		}
 	}
 
 	_emitEvent(event='update'){
@@ -530,12 +547,16 @@ class UIContactCard extends HTMLElement {
 	done(e){
 		this.editing = false;
 		this._populateViewFields();
+		this._renderMainView(true);
+		this._renderEditor(false);
 		this._emitEvent('update');
 	}
 
 	edit(e){
 		this.editing = true;
 		this._populateEditorFields();
+		this._renderEditor(true);
+		this._renderMainView(false);
 	}
 
 	_call(e){
@@ -582,9 +603,6 @@ class UIContactCard extends HTMLElement {
 		console.log('disconnectedCallback')
 	}
 
-
-
-
   updateName(e, person, property, $error){
     var keyCode = e.which || e.keyCode || e.keyIdentifier || 0;
     let isAlphabetical = this.alphabeticalRegex.test(e.key);
@@ -604,8 +622,11 @@ class UIContactCard extends HTMLElement {
       value = value.charAt(0).toUpperCase() + value.slice(1);;
       e.target.value = value;
       $error.innerHTML = '';
-      person[property] = value;
-			this.updatedOn = Date.now();
+
+			if(person[property] !== value){
+				person[property] = value;
+				this.updatedOn = Date.now();
+			}
     } else if(isSpace){
       value = value.replace(this.spaceRegex, '');
       e.target.value = value;
@@ -652,8 +673,10 @@ class UIContactCard extends HTMLElement {
         $error.innerHTML = '';
 				e.target.classList.remove('error-input');
 				this.$emailDivider.classList.remove('error-border')
-				person.email = e.target.value;
-				this.updatedOn = Date.now();
+				if(person[property] !== value){
+					person[property] = e.target.value;
+					this.updatedOn = Date.now();
+				}
       }
 		}
 		else if(isSpace){
@@ -711,11 +734,16 @@ class UIContactCard extends HTMLElement {
       if(isValid){
         $error.innerHTML = '';
         e.target.classList.remove('error-input');
-				person.telephone = telephone;
-				this.updatedOn = Date.now();
+				if(person[property] !== e.target.value){
+					person.telephone = telephone;
+					this.updatedOn = Date.now();
+				}
 			}
 			else if(isBlurEvent && isValid){
-        person[property] = telephone;
+				if(person[property] !== telephone){
+					person[property] = telephone;
+					this.updatedOn = Date.now();
+				}
 			}
 			else if(isNotValid && isNotBlank && isBlurEvent) {
         e.target.classList.add('error-input');
