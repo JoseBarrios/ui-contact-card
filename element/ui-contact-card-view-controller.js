@@ -78,6 +78,7 @@ class UIContactCard extends HTMLElement {
 				createdOn: Date.now()
 			}
 		}
+		this._renderTimer()
 	}
 
 	get person(){ return this.model.person || {}; }
@@ -136,7 +137,7 @@ class UIContactCard extends HTMLElement {
 
 	set updatedOn(date){
 		this.meta.updatedOn = parseInt(date);
-		this._populateViewFields();
+		this._renderTimer();
 	}
 
 	get createdOn(){
@@ -147,7 +148,7 @@ class UIContactCard extends HTMLElement {
 
 	set createdOn(date){
 		this.meta.createdOn = parseInt(date);
-		this._populateViewFields();
+		this._renderTimer();
 	}
 
 	get telephone(){
@@ -218,8 +219,9 @@ class UIContactCard extends HTMLElement {
 		this._displayMainView(true);
 		//Updates view minute
 		this.liveRendering = setInterval(e => {
-			this.meta = this.model.person.meta;
-		}, 1000);
+			this._renderTimer();
+			console.log('rendering', this.meta)
+		}, 60000);
 	}
 
 	attributeChangedCallback(attrName, oldVal, newVal) {
@@ -351,6 +353,10 @@ class UIContactCard extends HTMLElement {
 			}
 		});
 
+	}
+
+	_renderTimer(){
+		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 	}
 
 	_populateViewFields(){
