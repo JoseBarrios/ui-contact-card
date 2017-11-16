@@ -92,19 +92,21 @@ class UIContactCard extends HTMLElement {
 			this._populateViewFields();
 			this._populateEditorFields();
 		})
-
 	}
 
 	get editing(){ return this.state.editing; }
 	set editing(isEditing){
 		this.state.editing = isEditing;
 		let isNotEditing = !isEditing;
-		this.waitForConnection().then(connected => {
-			this._clearEditorErrors();
-			this._populateEditorFields();
-			this._renderEditor(true);
-			this._renderMainView(false);
-		})
+
+		if(isEditing){
+			this.waitForConnection().then(connected => {
+				this._clearEditorErrors();
+				this._populateEditorFields();
+				this._renderEditor(true);
+				this._renderMainView(false);
+			})
+		}
 	}
 
 	get hasName(){
@@ -228,12 +230,17 @@ class UIContactCard extends HTMLElement {
 	waitForConnection(){
 		return new Promise((resolve, reject) => {
 			let connected = this.state.connected;
-			let checkConnection = setInterval((e)=>{
+
+			let checkConnection = () => {
 				if(this.state.connected){
 					clearInterval(checkConnection)
 					resolve(true);
+				} else {
+					requestAnimationFrame(checkConnection);
 				}
-			}, 100);
+			}
+			//Call immidiately
+			checkConnection();
 		})
 	}
 
