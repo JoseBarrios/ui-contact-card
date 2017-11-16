@@ -178,8 +178,37 @@
       margin-bottom:44px;
     }
 
-		.active {
+		.active-border {
       border: 1px solid #1c7ef8;
+			cursor:pointer;
+		}
+		.inactive-border {
+      border: 1px solid #f3f3f5;
+			cursor:default;
+		}
+		.active-header {
+      color: black;
+			cursor:default;
+		}
+		.inactive-header {
+      color: #808080;
+			cursor:default;
+		}
+		.active-text {
+      color: #1c7ef8;
+			cursor:pointer;
+		}
+		.inactive-text {
+      color: #808080;
+			cursor:default;
+		}
+		.active-background {
+      background-color: #1c7ef8;
+			cursor:pointer;
+		}
+		.inactive-background {
+      background-color: #808080;
+			cursor:default;
 		}
 
 
@@ -309,7 +338,7 @@
 					</div> <!--Header-->
 
 					<!--Add Button-->
-					<p id="addEmergencyContactButton" class="host info-value hide-view">add contact</p>
+					<p id="addEmergencyContactButton" class="host info-value">add contact</p>
 
 					<!--FULL NAME-->
 					<div id="emergencyFullNameContainer">
