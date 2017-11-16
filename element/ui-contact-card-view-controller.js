@@ -16,6 +16,15 @@ class UIContactCard extends HTMLElement {
 		const view = document.importNode(uiContactCardTemplate.content, true);
 		this.shadowRoot = this.attachShadow({mode: 'open'});
 		this.shadowRoot.appendChild(view);
+
+		this.SPACE_KEY = 32;
+		this.spaceRegex = /\s+/g;
+		this.digitRegex = /\d+/g;
+		this.nonAlphabeticalRegex = /\W/g;
+		this.alphabeticalRegex = /^[A-z]+$/;
+		this.emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  	this.telephoneRegex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+
 	}
 
 	get shadowRoot(){return this._shadowRoot;}
@@ -54,10 +63,27 @@ class UIContactCard extends HTMLElement {
 		}
 	}
 
+	get meta(){
+		return this.person.meta || {
+				updatedOn: Date.now(),
+				createdOn: Date.now()
+			}
+	}
+	set meta(value){
+		if(value.updatedOn || value.createdOn){
+			this.person.meta = value;
+		} else {
+			this.person.meta = {
+				updatedOn: Date.now(),
+				createdOn: Date.now()
+			}
+		}
+	}
+
 	get person(){ return this.model.person || {}; }
 	set person(value){
 		this.model.person = value;
-		this._emitEvent('update');
+		this.meta = this.model.person.meta;
 		this._populateViewFields();
 	}
 
@@ -68,44 +94,119 @@ class UIContactCard extends HTMLElement {
 		this._displayMainView(isNotEditing);
 		this._displayEditor(isEditing);
 		this._populateEditorFields();
-		this._emitEvent('edit');
+		this._clearEditorErrors();
+	}
+
+	get hasName(){
+		return (this.givenName || this.familyName);
+	}
+
+
+	get givenName(){
+		let givenName = null;
+		if(this.person.givenName){
+			givenName = this.person.givenName;
+			givenName = givenName.charAt(0).toUpperCase() + givenName.slice(1);;
+		}
+		return givenName;
+	}
+
+	get familyName(){
+		let familyName = null;
+		if(this.person.familyName){
+			familyName = this.person.familyName;
+			familyName = familyName.charAt(0).toUpperCase() + familyName.slice(1);;
+		}
+		return familyName;
+	}
+
+	get fullName(){
+		let fullName = null;
+		if(this.givenName || this.familyName){
+			fullName = `${this.givenName || ''} ${this.familyName || ''}`;
+		}
+		return fullName;
+	}
+
+	get updatedOn(){
+		let result = moment(this.meta.updatedOn).fromNow();
+		result = `Updated ${result}`;
+		return result;
+	}
+
+	set updatedOn(date){
+		this.meta.updatedOn = parseInt(date);
+		this._populateViewFields();
+	}
+
+	get createdOn(){
+		let result = moment(this.meta.createdOn).fromNow();
+		result = `Created ${result}`;
+		return result;
+	}
+
+	set createdOn(date){
+		this.meta.createdOn = parseInt(date);
+		this._populateViewFields();
+	}
+
+	get telephone(){
+		let telephone = null;
+		if(this.person.telephone){
+			telephone = this.formatTelephoneNumber(this.person.telephone);
+		}
+		return telephone;
+	}
+
+	get email(){
+		let email = null;
+		if(this.person.email){
+			email = this.person.email.toLowerCase();
+		}
+		return email;
 	}
 
 	get hasEmergencyContact(){
 		return (this.person.knows && this.person.knows.length);
 	}
 
-	get hasName(){
-		return (this.person.givenName || this.person.familyName);
+	get emergencyContact(){
+		let hasEmergencyContact = this.person.knows && this.person.knows.length;
+		return hasEmergencyContact? this.person.knows[0] : {};
 	}
 
-	get fullName(){
-		let fullName = null;
-		if(this.person.givenName || this.person.familyName){
-			fullName = `${this.person.givenName || ''} ${this.person.familyName || ''}`;
+	get emergencyGivenName(){
+		let givenName = null;
+		if(this.hasEmergencyContact && this.emergencyContact.givenName){
+			givenName = this.emergencyContact.givenName;
+			givenName = givenName.charAt(0).toUpperCase() + givenName.slice(1);;
 		}
-		return fullName;
+		return givenName;
+	}
+
+	get emergencyFamilyName(){
+		let familyName = null;
+		if(this.hasEmergencyContact && this.emergencyContact.familyName){
+			familyName = this.emergencyContact.familyName;
+			familyName = familyName.charAt(0).toUpperCase() + familyName.slice(1);;
+		}
+		return familyName;
 	}
 
 	get emergencyFullName(){
 		let fullName = null;
-		if(this.hasEmergencyContact && (this.emergencyContact.givenName || this.emergencyContact.familyName)){
-			fullName = `${this.emergencyContact.givenName} ${this.emergencyContact.familyName}`;
+		if(this.emergencyGivenName || this.emergencyFamilyName){
+			fullName = `${this.emergencyGivenName} ${this.emergencyFamilyName}`;
 		}
 		return fullName;
 	}
 
-	get createdDate(){
-		return 'CREATED DATE: TODO';
-	}
-
-	get updatedDate(){
-		return 'UPDATED: TODO';
-	}
-
-	get emergencyContact(){
-		let hasEmergencyContact = this.person.knows && this.person.knows.length;
-		return hasEmergencyContact? this.person.knows[0] : {};
+	get emergencyTelephone(){
+		let telephone = null;
+		if(this.hasEmergencyContact && this.emergencyContact.telephone){
+			telephone = this.formatTelephoneNumber(this.emergencyContact.telephone);
+		}
+		return telephone;
 	}
 
 	//ViewDidLoad
@@ -115,6 +216,10 @@ class UIContactCard extends HTMLElement {
 		this._populateViewFields();
 		this._displayEditor(false);
 		this._displayMainView(true);
+		//Updates view minute
+		this.liveRendering = setInterval(e => {
+			this.meta = this.model.person.meta;
+		}, 1000);
 	}
 
 	attributeChangedCallback(attrName, oldVal, newVal) {
@@ -137,7 +242,7 @@ class UIContactCard extends HTMLElement {
 		this.$doneButton = this.shadowRoot.querySelector('#doneButton');
 		this.$deleteButton = this.shadowRoot.querySelector('#deleteButton');
 		this.$fullName = this.shadowRoot.querySelector('#fullName');
-		this.$lastUpdated = this.shadowRoot.querySelector('#lastUpdated');
+		this.$updatedOn = this.shadowRoot.querySelector('#updatedOn');
 		this.$telephoneActionButton = this.shadowRoot.querySelector('#telephoneActionButton');
 		this.$telephoneActionLabel = this.shadowRoot.querySelector('#telephoneActionLabel');
 		this.$telephoneIcon = this.shadowRoot.querySelector('#telephoneIcon');
@@ -148,6 +253,7 @@ class UIContactCard extends HTMLElement {
 		this.$telephone = this.shadowRoot.querySelector('#telephone');
 		this.$emailView = this.shadowRoot.querySelector('#emailView');
 		this.$email = this.shadowRoot.querySelector('#email');
+		this.$emailDivider = this.shadowRoot.querySelector('#emailDivider');
 		this.$emergencyFullNameView = this.shadowRoot.querySelector('#emergencyFullNameView');
 		this.$emergencyFullName = this.shadowRoot.querySelector('#emergencyFullName');
 		this.$emergencyTelephoneView = this.shadowRoot.querySelector('#emergencyTelephoneView');
@@ -183,15 +289,26 @@ class UIContactCard extends HTMLElement {
 		this.$deleteButton.addEventListener('click', this.delete.bind(this))
 		this.$doneButton.addEventListener('click', this.done.bind(this))
 
-		this.$addEmergencyContactButton.addEventListener('click', e => {
-			this.editing = true;
-			this.$emergencyGivenNameInput.focus();
-		});
+  	this.$givenNameInput.addEventListener('keyup', (e) => this.updateName(e, this.person, 'givenName', this.$givenNameError) );
+  	this.$givenNameInput.addEventListener('blur', (e) => this.updateName(e, this.person, 'givenName', this.$givenNameError) );
+  	this.$familyNameInput.addEventListener('keyup', (e) => this.updateName(e, this.person, 'familyName', this.$familyNameError) );
+  	this.$familyNameInput.addEventListener('blur', (e) => this.updateName(e, this.person, 'familyName', this.$familyNameError) );
+		this.$emailInput.addEventListener('keyup', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
+		this.$emailInput.addEventListener('blur', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
+		this.$telephoneInput.addEventListener('input', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
+		this.$telephoneInput.addEventListener('blur', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
+
+  	this.$emergencyGivenNameInput.addEventListener('keyup', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
+  	this.$emergencyGivenNameInput.addEventListener('blur', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
+  	this.$emergencyFamilyNameInput.addEventListener('keyup', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
+  	this.$emergencyFamilyNameInput.addEventListener('blur', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
+		this.$emergencyTelephoneInput.addEventListener('input', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
+		this.$emergencyTelephoneInput.addEventListener('blur', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
 
 		this.$emailActionButton.addEventListener('click', e => {
 			let notEditing = !this.editing;
 			if(notEditing){
-				e.email = this.person.email;
+				e.email = this.email;
 				this._email(e);
 			}
 		});
@@ -199,7 +316,7 @@ class UIContactCard extends HTMLElement {
 		this.$email.addEventListener('click', e => {
 			let notEditing = !this.editing;
 			if(notEditing){
-				e.email = this.person.email;
+				e.email = this.email;
 				this._email(e);
 			}
 		});
@@ -220,6 +337,12 @@ class UIContactCard extends HTMLElement {
 			}
 		});
 
+		this.$addEmergencyContactButton.addEventListener('click', e => {
+			this.editing = true;
+			this.$emergencyGivenNameInput.focus();
+		});
+
+
 		this.$emergencyTelephone.addEventListener('click', e => {
 			let notEditing = !this.editing;
 			if(this.hasEmergencyContact && notEditing ){
@@ -227,18 +350,19 @@ class UIContactCard extends HTMLElement {
 				this._call(e);
 			}
 		});
+
 	}
 
 	_populateViewFields(){
 		this.$fullName.innerHTML = this.fullName || "New Contact";
-		this.$lastUpdated.innerHTML = this.updatedDate || this.createdDate;;
-		this.$email.innerHTML = this.person.email || 'add email';
-		this.$telephone.innerHTML = this.person.telephone || 'add number';
+		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
+		this.$email.innerHTML = this.email || 'add email';
+		this.$telephone.innerHTML = this.telephone || 'add number';
 		//EMERGENCY CONTACT
 		if(this.hasEmergencyContact){
 			this.$addEmergencyContactButton.hidden = true;;
 			this.$emergencyFullName.innerHTML = this.emergencyFullName || '';
-			this.$emergencyTelephone.innerHTML = this.emergencyContact.telephone || 'add number';
+			this.$emergencyTelephone.innerHTML = this.emergencyTelephone || 'add number';
 		} else {
 			//No emergency contact, add one
 			this.$addEmergencyContactButton.hidden = false;;
@@ -293,16 +417,20 @@ class UIContactCard extends HTMLElement {
 	}
 
 	_populateEditorFields(){
-		this.$givenNameInput.value = this.person.givenName || '';
-		this.$familyNameInput.value = this.person.familyName || '';
-		this.$telephoneInput.value = this.person.telephone || '';
-		this.$emailInput.value = this.person.email || '';
+		this.$givenNameInput.value = this.givenName || '';
+		this.$familyNameInput.value = this.familyName || '';
+		this.$telephoneInput.value = this.telephone || '';
+		this.$emailInput.value = this.email || '';
 		if(this.hasEmergencyContact){
-			let emergencyContact = this.person.knows[0];
-			this.$emergencyGivenNameInput.value = emergencyContact.givenName || '';
-			this.$emergencyFamilyNameInput.value = emergencyContact.familyName || '';
-			this.$emergencyTelephoneInput.value = emergencyContact.telephone || '';
+			this.$emergencyGivenNameInput.value = this.emergencyGivenName || '';
+			this.$emergencyFamilyNameInput.value = this.emergencyFamilyName || '';
+			this.$emergencyTelephoneInput.value = this.emergencyTelephone || '';
 		}
+	}
+
+	_clearEditorErrors(){
+		console.log('CALLING CLEAR ERRORS')
+		this.$telephoneInput.classList.remove('error-input');
 	}
 
 	_displayMainView(show){
@@ -324,6 +452,7 @@ class UIContactCard extends HTMLElement {
 
 	_emitEvent(event='update'){
 		let data = {};
+		data.meta = this.meta;
 		data.model = this.model;
 		data.state = this.state;
 		this.dispatchEvent(new CustomEvent(event, {detail: data}));
@@ -337,10 +466,13 @@ class UIContactCard extends HTMLElement {
 
 	done(e){
 		this.editing = false;
+		this._populateViewFields();
+		this._emitEvent('update');
 	}
 
 	edit(e){
 		this.editing = true;
+		this._populateEditorFields();
 	}
 
 	_call(e){
@@ -363,7 +495,7 @@ class UIContactCard extends HTMLElement {
 
 	_email(e){
 		if(e.email && !this.editing){
-			window.location.href = `mailto:${this.person.email}`;
+			window.location.href = `mailto:${this.email}`;
 			let animationDuration = 3000;
 			this.$emailIcon.classList.remove("fa-envelope");
 			this.$emailIcon.classList.add("fa-circle-o-notch","fa-spin");
@@ -381,6 +513,7 @@ class UIContactCard extends HTMLElement {
 
 	disconnectedCallback() {
 		this.connected = false;
+		clearInterval(this.liveRendering);
 		//TODO: Remove DOM References, events, etc
 		//this.$editButton.removeEventListener('click', this.edit.bind(this))
 		console.log('disconnectedCallback')
@@ -388,6 +521,160 @@ class UIContactCard extends HTMLElement {
 
 
 
+
+  updateName(e, person, property, $error){
+    var keyCode = e.which || e.keyCode || e.keyIdentifier || 0;
+    let isAlphabetical = this.alphabeticalRegex.test(e.key);
+    let isNotAlphabetical = isAlphabetical;
+    let isNotSpace = (keyCode !== this.SPACE_KEY);
+    let isNotBlank = e.target.value && e.target.value !== "";
+    let isBlurEvent = e.type === 'blur';
+    let isBlank = !isNotBlank;
+    let isSpace = !isNotSpace;
+    let isValid = (isNotBlank && isNotSpace && isAlphabetical);
+    let personHasProperty = person[property];
+    let personDoesNotHaveProperty = !personHasProperty;
+    let value = e.target.value;
+
+
+    if(isValid){
+      value = value.charAt(0).toUpperCase() + value.slice(1);;
+      e.target.value = value;
+      $error.innerHTML = '';
+      person[property] = value;
+			this.updatedOn = Date.now();
+    } else if(isSpace){
+      value = value.replace(this.spaceRegex, '');
+      e.target.value = value;
+      $error.innerHTML = 'cannot contain spaces';
+    } else if(!isAlphabetical){
+      $error.innerHTML = 'cannot contain numbers, or special characters';
+      value = value.replace(this.digitRegex, '')
+      value = value.replace(this.nonAlphabeticalRegex, '')
+      e.target.value = value;
+    } else if(isBlank && isBlurEvent && personHasProperty){
+      $error.innerHTML = 'cannot be blank, used last known name instead';
+      e.target.value = person[property];
+    }
+
+  }
+
+  updateEmail(e, person, property, $error){
+    var keyCode = e.which || e.keyCode || e.keyIdentifier || 0;
+    let isNotSpace = (keyCode !== this.SPACE_KEY);
+    let isSpace = !isNotSpace;
+    let isNotBlank = e.target.value && e.target.value !== "";
+    let isBlank = !isNotBlank;
+    let isBlurEvent = e.type === 'blur';
+
+    let isValid = isNotSpace;
+    let personHasProperty = person[property];
+    let personDoesNotHaveProperty = !personHasProperty;
+    let value = e.target.value;
+    $error.innerHTML = '';
+		e.target.classList.remove('error-input');
+
+    if(isValid){
+      let isEmail = this.emailRegex.test(value);
+      let isNotEmail = !isEmail;
+      if(isNotEmail && isNotBlank && isBlurEvent){
+        $error.innerHTML = 'must be valid (e.g., your@email.com)';
+				this.$emailDivider.classList.add('error-border')
+				e.target.classList.add('error-input');
+      } else if(isBlank){
+        $error.innerHTML = '';
+				e.target.classList.remove('error-input');
+				this.$emailDivider.classList.remove('error-border')
+      } else if(isEmail && isBlurEvent){
+        $error.innerHTML = '';
+				e.target.classList.remove('error-input');
+				this.$emailDivider.classList.remove('error-border')
+				person.email = e.target.value;
+				this.updatedOn = Date.now();
+      }
+		}
+		else if(isSpace){
+      value = value.replace(this.spaceRegex, '');
+      e.target.value = value;
+      $error.innerHTML = 'cannot contain spaces';
+    }
+
+  }
+
+  formatTelephoneNumber(s){
+      var s2 = (""+s).replace(/\D/g, '');
+      var m1 = s2.match(/^(\d{1})$/);
+      var m2 = s2.match(/^(\d{2})$/);
+      var m3 = s2.match(/^(\d{3})$/);
+      var m4 = s2.match(/^(\d{3})(\d{1})$/);
+      var m5 = s2.match(/^(\d{3})(\d{2})$/);
+      var m6 = s2.match(/^(\d{3})(\d{3})$/);
+      var m7 = s2.match(/^(\d{3})(\d{3})(\d{1})$/);
+      var m8 = s2.match(/^(\d{3})(\d{3})(\d{2})$/);
+      var m9 = s2.match(/^(\d{3})(\d{3})(\d{3})$/);
+      var m10 = s2.match(/^(\d{3})(\d{3})(\d{4})$/);
+
+      let finalFormat = "";
+      finalFormat = m1? `(${m1[1]}) - ` : finalFormat;
+      finalFormat = m2? `(${m2[1]}) - ` : finalFormat;
+      finalFormat = m3? `(${m3[1]}) - ` : finalFormat;
+      finalFormat = m4? `(${m4[1]}) ${m4[2]}- ` : finalFormat;
+      finalFormat = m5? `(${m5[1]}) ${m5[2]}- ` : finalFormat;
+      finalFormat = m6? `(${m6[1]}) ${m6[2]}- ` : finalFormat;
+      finalFormat = m7? `(${m7[1]}) ${m7[2]}-${m7[3]}` : finalFormat;
+      finalFormat = m8? `(${m8[1]}) ${m8[2]}-${m8[3]}` : finalFormat;
+      finalFormat = m9? `(${m9[1]}) ${m9[2]}-${m9[3]}` : finalFormat;
+      finalFormat = m10? `(${m10[1]}) ${m10[2]}-${m10[3]}` : finalFormat;
+      return finalFormat;
+  }
+
+
+  updateTelephone(e, person, property, $error){
+
+    if(e.inputType !== 'deleteContentBackward'){
+      e.target.value = this.formatTelephoneNumber(e.target.value)
+      let telephone = e.target.value.replace(/\D/g, '');
+      let numDigits = telephone.length;
+      numDigits += numDigits >= 6? 4 : 0;
+      numDigits += numDigits >= 3 && numDigits < 6? 3 : 0;
+      numDigits += numDigits < 3? 1 : 0;
+      e.target.setSelectionRange(numDigits,numDigits)
+      let isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
+      let isNotBlank = !isBlank;
+      let isValid = this.telephoneRegex.test(e.target.value);
+      let isNotValid = !isValid;
+      let isBlurEvent = e.type === 'blur';
+
+      if(isValid){
+        $error.innerHTML = '';
+        e.target.classList.remove('error-input');
+				person.telephone = telephone;
+				this.updatedOn = Date.now();
+			}
+			else if(isBlurEvent && isValid){
+        person[property] = telephone;
+			}
+			else if(isNotValid && isNotBlank && isBlurEvent) {
+        e.target.classList.add('error-input');
+				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
+			}
+    }
+    //DELETING
+    else {
+      let value = e.target.value;
+      let lastIndex = value.length - 1;
+      let nextChar = value.charAt(lastIndex)
+      let secondToLastChar = value.charAt(lastIndex-1)
+      if(nextChar === '-'){
+        e.target.value = value.substring(0, lastIndex);
+      }else if(nextChar === ' '){
+        e.target.value = value.substring(0, lastIndex);
+        e.target.setSelectionRange(lastIndex-1,lastIndex-1)
+      }else if(secondToLastChar === '('){
+        e.target.value = '';
+      }
+    }
+  }
 
 }
 

@@ -21,22 +21,25 @@
 	window.addEventListener('WebComponentsReady', function(e) {
 
 		let camille = {};
-		camille.givenName = 'Camille';
-		camille.familyName = 'Barrios';
-		camille.telephone = '12061234567';
+		camille.givenName = 'camille';
+		camille.familyName = 'barrios';
+		camille.telephone = '2061234567';
+
+		let meta = {};
 
 		let jose = {};
-		jose.givenName = 'Jose';
-		jose.familyName = 'Barrios';
-		jose.email = 'jose@barrios.io';
-		jose.telephone = '12505888968';
+		jose.givenName = 'jose';
+		jose.familyName = 'barrios';
+		jose.email = 'Jose@Barrios.Io';
+		jose.telephone = '2505888968';
 		jose.knows = [];
+		jose.meta = meta;
 		jose.knows.push(camille);
 
 		let model = JSON.stringify(jose);
 		let contactCards = document.querySelectorAll('ui-contact-card');
 		contactCards.forEach(contactCard => {
-			contactCard.addEventListener('update', e=> { console.log('UPDATE', e); });
+			contactCard.addEventListener('update', e=> { console.log('UPDATE', e.detail.meta); });
 			contactCard.setAttribute('person', model);
 		})
 	});

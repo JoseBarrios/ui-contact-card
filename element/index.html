@@ -148,9 +148,14 @@
 			font-size:1.3em;
 		}
 
-		.input-error {
+		.error-label {
 			color:#808080;
 		}
+
+		.error-input {
+			color:#fc3d39 !important;
+		}
+
 
 		.info-value {
 			padding-bottom:22px;
@@ -186,6 +191,13 @@
 			border: 1px solid #f3f3f5;
 			cursor:default;
 		}
+		.error-border {
+			border: 1px solid #fc3d39;
+			cursor:default;
+		}
+
+
+
 		.active-header {
 			color: black;
 			cursor:default;
@@ -249,7 +261,7 @@
 			<button id="editButton" class="host edit-button">Edit</button>
 			<!--Fullname-->
 			<h1 id="fullName" class="host full-name">&nbsp;</h1>
-			<p id="lastUpdated" class="host last-updated">&nbsp;</p>
+			<p id="updatedOn" class="host last-updated">&nbsp;</p>
 			<!--Tap Actions-->
 			<div class="host action-container">
 				<!--<div id="deleteActionButton" class="host action-button danger-action">-->
@@ -281,14 +293,14 @@
 					<!--EDIT-->
 					<div id="givenNameEdit">
 						<p class="host info-label editing">first name &nbsp;</p>
-						<p id="givenNameError" class="info-label input-error"></p>
+						<p id="givenNameError" class="info-label error-label"></p>
 						<input id="givenNameInput" placeholder="Jane" class="host info-value"/>
 						<div class="host info-divider"></div>
 					</div> <!--EDIT-->
 					<!--EDIT-->
 					<div id="familyNameEdit">
 						<p class="host info-label editing">last name &nbsp;</p>
-						<p id="familyNameError" class="info-label input-error"></p>
+						<p id="familyNameError" class="info-label error-label"></p>
 						<input id="familyNameInput" placeholder="Doe" class="host info-value"/>
 						<div class="host info-divider"></div>
 					</div> <!--EDIT-->
@@ -305,7 +317,7 @@
 					<!--EDIT-->
 					<div id="telephoneEdit">
 						<p class="host info-label editing">phone &nbsp;</p>
-						<p id="telephoneError" class="info-label input-error"></p>
+						<p id="telephoneError" class="info-label error-label"></p>
 						<input id="telephoneInput" placeholder="(555) 555-5555" class="host info-value"/>
 						<div class="host info-divider"></div>
 					</div> <!--EDIT-->
@@ -322,9 +334,9 @@
 					<!--EDIT-->
 					<div id="emailEdit">
 						<p class="host info-label editing">email &nbsp;</p>
-						<p id="emailError" class="info-label input-error"></p>
+						<p id="emailError" class="info-label error-label"></p>
 						<input id="emailInput" placeholder="email@email.com" class="host info-value"/>
-						<div id="contactEmailDivider" class="host info-divider"></div>
+						<div id="emailDivider" class="host info-divider"></div>
 					</div> <!--EDIT-->
 				</div><!--EMAIL-->
 
@@ -351,14 +363,14 @@
 							<!--Given Name-->
 							<div>
 								<p class="host info-label editing">first name &nbsp;</p>
-								<p id="emergencyGivenNameError" class="info-label input-error"></p>
+								<p id="emergencyGivenNameError" class="info-label error-label"></p>
 								<input id="emergencyGivenNameInput" placeholder="John" class="host info-value"/>
 								<div class="host info-divider"></div>
 							</div> <!--Given Name-->
 							<!--Last Name-->
 							<div>
 								<p class="host info-label editing">last name &nbsp;</p>
-								<p id="emergencyFamilyNameError" class="info-label input-error"></p>
+								<p id="emergencyFamilyNameError" class="info-label error-label"></p>
 								<input id="emergencyFamilyNameInput" placeholder="Doe" class="host info-value"/>
 								<div class="host info-divider"></div>
 							</div><!--Last Name-->
@@ -375,7 +387,7 @@
 						<!--EDIT-->
 						<div id="emergencyTelephoneEdit">
 							<p class="host info-label editing">phone &nbsp;</p>
-							<p id="emergencyTelephoneError" class="info-label input-error"></p>
+							<p id="emergencyTelephoneError" class="info-label error-label"></p>
 							<input id="emergencyTelephoneInput" placeholder="(555) 555-5555" class="host info-value"/>
 							<div class="host info-divider"></div>
 						</div> <!--EDIT-->
