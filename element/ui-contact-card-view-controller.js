@@ -11,11 +11,14 @@ class UIContactCard extends HTMLElement {
 
 	constructor(model){
 		super();
-		this.state = {};
 		this.model = model || {};
 		const view = document.importNode(uiContactCardTemplate.content, true);
 		this.shadowRoot = this.attachShadow({mode: 'open'});
 		this.shadowRoot.appendChild(view);
+
+		this.state = {};
+		this.state.connected = false;
+		this.state.editing = false;
 
 		this.SPACE_KEY = 32;
 		this.spaceRegex = /\s+/g;
@@ -70,7 +73,7 @@ class UIContactCard extends HTMLElement {
 			}
 	}
 	set meta(value){
-		if(value.updatedOn || value.createdOn){
+		if(value && (value.updatedOn || value.createdOn)){
 			this.person.meta = value;
 		} else {
 			this.person.meta = {
@@ -85,17 +88,23 @@ class UIContactCard extends HTMLElement {
 	set person(value){
 		this.model.person = value;
 		this.meta = this.model.person.meta;
-		this._populateViewFields();
+		this.waitForConnection().then(connected => {
+			this._populateViewFields();
+			this._populateEditorFields();
+		})
+
 	}
 
 	get editing(){ return this.state.editing; }
 	set editing(isEditing){
 		this.state.editing = isEditing;
 		let isNotEditing = !isEditing;
-		this._displayMainView(isNotEditing);
-		this._displayEditor(isEditing);
-		this._populateEditorFields();
-		this._clearEditorErrors();
+		this.waitForConnection().then(connected => {
+			this._clearEditorErrors();
+			this._populateEditorFields();
+			this._renderEditor(true);
+			this._renderMainView(false);
+		})
 	}
 
 	get hasName(){
@@ -168,7 +177,12 @@ class UIContactCard extends HTMLElement {
 	}
 
 	get hasEmergencyContact(){
-		return (this.person.knows && this.person.knows.length);
+		let result = false;
+		if(this.person.knows && this.person.knows.length){
+			let contact = this.person.knows[0];
+			result = (contact.givenName || contact.familyName || contact.telephone);
+		}
+		return result;
 	}
 
 	get emergencyContact(){
@@ -197,7 +211,7 @@ class UIContactCard extends HTMLElement {
 	get emergencyFullName(){
 		let fullName = null;
 		if(this.emergencyGivenName || this.emergencyFamilyName){
-			fullName = `${this.emergencyGivenName} ${this.emergencyFamilyName}`;
+			fullName = `${this.emergencyGivenName || ''} ${this.emergencyFamilyName || ''}`;
 		}
 		return fullName;
 	}
@@ -210,18 +224,35 @@ class UIContactCard extends HTMLElement {
 		return telephone;
 	}
 
+	//ADD to template
+	waitForConnection(){
+		return new Promise((resolve, reject) => {
+			let connected = this.state.connected;
+			let checkConnection = setInterval((e)=>{
+				if(this.state.connected){
+					clearInterval(checkConnection)
+					resolve(true);
+				}
+			}, 100);
+		})
+	}
+
 	//ViewDidLoad
 	connectedCallback() {
 		this._initViewReferences();
 		this._initEventListeners();
+
+		this._populateEditorFields();
+		this._renderEditor(this.editing);
+
 		this._populateViewFields();
-		this._displayEditor(false);
-		this._displayMainView(true);
+		this._renderMainView(!this.editing);
 		//Updates view minute
 		this.liveRendering = setInterval(e => {
 			this._renderTimer();
 			console.log('rendering', this.meta)
 		}, 60000);
+		this.connected = true;
 	}
 
 	attributeChangedCallback(attrName, oldVal, newVal) {
@@ -243,8 +274,9 @@ class UIContactCard extends HTMLElement {
 		this.$editButton = this.shadowRoot.querySelector('#editButton');
 		this.$doneButton = this.shadowRoot.querySelector('#doneButton');
 		this.$deleteButton = this.shadowRoot.querySelector('#deleteButton');
-		this.$fullName = this.shadowRoot.querySelector('#fullName');
+		this.$fullNameHeader = this.shadowRoot.querySelector('#fullNameHeader');
 		this.$updatedOn = this.shadowRoot.querySelector('#updatedOn');
+		this.$fullNameView = this.shadowRoot.querySelector('#fullNameView');
 		this.$telephoneActionButton = this.shadowRoot.querySelector('#telephoneActionButton');
 		this.$telephoneActionLabel = this.shadowRoot.querySelector('#telephoneActionLabel');
 		this.$telephoneIcon = this.shadowRoot.querySelector('#telephoneIcon');
@@ -331,6 +363,11 @@ class UIContactCard extends HTMLElement {
 			}
 		});
 
+		this.$fullNameView.addEventListener('click', e => {
+			this.editing = true;
+			this.$givenNameInput.focus();
+		})
+
 		this.$telephone.addEventListener('click', e => {
 			let notEditing = !this.editing;
 			if(notEditing){
@@ -360,27 +397,40 @@ class UIContactCard extends HTMLElement {
 	}
 
 	_populateViewFields(){
-		this.$fullName.innerHTML = this.fullName || "New Contact";
+		this.$fullNameHeader.innerHTML = this.fullName || "New Contact";
+
+		if(this.hasName){
+			this.$fullNameView.classList.add('hide-view');
+		} else {
+			this.$fullNameView.classList.remove('hide-view');
+		}
+
 		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 		this.$email.innerHTML = this.email || 'add email';
 		this.$telephone.innerHTML = this.telephone || 'add number';
+
 		//EMERGENCY CONTACT
 		if(this.hasEmergencyContact){
-			this.$addEmergencyContactButton.hidden = true;;
+			this.$addEmergencyContactButton.classList.add('hide-view');
+			this.$emergencyFullName.classList.remove('hide-view');
+			this.$emergencyTelephone.classList.remove('hide-view');
 			this.$emergencyFullName.innerHTML = this.emergencyFullName || '';
 			this.$emergencyTelephone.innerHTML = this.emergencyTelephone || 'add number';
 		} else {
+			console.log('hasEmergencyContact returned false')
+			this.$addEmergencyContactButton.classList.remove('hide-view');
+			this.$emergencyTelephone.classList.add('hide-view');
+			this.$emergencyFullName.classList.add('hide-view');
 			//No emergency contact, add one
-			this.$addEmergencyContactButton.hidden = false;;
 		}
 	}
 
 	//CHANGE SHOW VAR NAME, IT"S CONFUSING
-	_displayEditor(show){
+	_renderEditor(show){
 		let activeHeader = show? 'active-header' : 'inactive-header';
 		let inactiveHeader = show? 'inactive-header' : 'active-header';
-		this.$fullName.classList.add(inactiveHeader);
-		this.$fullName.classList.remove(activeHeader);
+		this.$fullNameHeader.classList.add(inactiveHeader);
+		this.$fullNameHeader.classList.remove(activeHeader);
 
 		let activeBorder = show? 'active-border' : 'inactive-border';
 		let inactiveBorder = show? 'inactive-border' : 'active-border';
@@ -439,7 +489,7 @@ class UIContactCard extends HTMLElement {
 		this.$telephoneInput.classList.remove('error-input');
 	}
 
-	_displayMainView(show){
+	_renderMainView(show){
 		//If show is true, add class is show-view
 		let addClass = show? 'show-view' : 'hide-view';
 		//If show is false, add class is hide-view

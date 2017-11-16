@@ -260,7 +260,7 @@
 			<button id="doneButton" class="host done-button">Done</button>
 			<button id="editButton" class="host edit-button">Edit</button>
 			<!--Fullname-->
-			<h1 id="fullName" class="host full-name">&nbsp;</h1>
+			<h1 id="fullNameHeader" class="host full-name">&nbsp;</h1>
 			<p id="updatedOn" class="host last-updated">&nbsp;</p>
 			<!--Tap Actions-->
 			<div class="host action-container">
@@ -287,6 +287,11 @@
 			<form action="/person/xerson/update" method="POST">
 
 				<!--------------------- CONTACT INFO  ---------------------------->
+				<div id="fullNameView">
+					<p class="host info-label">name</p>
+					<p id="fullName" class="host info-value">add name</p>
+					<div class="host info-divider"></div>
+				</div> <!--VIEW-->
 
 				<!--FULLNAME EDIT-->
 				<div id="fullNameEdit">
