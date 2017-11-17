@@ -561,7 +561,7 @@ class UIContactCard extends HTMLElement {
 		this._renderMainView(true);
 		this._renderEditor(false);
 		this._emitEvent('update');
-		//this.$form.submit();
+		this.$form.submit();
 	}
 
 	edit(e){
