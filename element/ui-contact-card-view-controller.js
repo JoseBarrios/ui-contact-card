@@ -528,6 +528,7 @@ class UIContactCard extends HTMLElement {
 	edit(e){
 		//Setter handles everything
 		this.editing = true;
+		this._emitEvent('editing');
 	}
 
 	clear(){
