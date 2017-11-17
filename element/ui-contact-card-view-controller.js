@@ -6,7 +6,7 @@ const uiContactCardTemplate = uiContactCardDoc.ownerDocument.querySelector('#ui-
 class UIContactCard extends HTMLElement {
 
 	static get observedAttributes(){
-		return ['person', 'edit'];
+		return ['person', 'edit', 'action'];
 	}
 
 	constructor(model){
@@ -19,6 +19,7 @@ class UIContactCard extends HTMLElement {
 		this.state = {};
 		this.state.connected = false;
 		this.state.editing = false;
+		this.state.action = '/people/create';
 
 		this.SPACE_KEY = 32;
 		this.spaceRegex = /\s+/g;
@@ -28,10 +29,19 @@ class UIContactCard extends HTMLElement {
 		this.emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   	this.telephoneRegex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
 
+		this.instantiatedOn = Date.now();
+
 	}
 
 	get shadowRoot(){return this._shadowRoot;}
 	set shadowRoot(value){ this._shadowRoot = value}
+
+	get action(){
+		return this.state.action || '/people/create';
+	}
+	set action(value){
+		this.state.action = value;
+	}
 
 	get connected(){ return this.state.connected; }
 	set connected(value){ this.state.connected = value; }
@@ -68,20 +78,11 @@ class UIContactCard extends HTMLElement {
 
 	get meta(){
 		return this.person.meta || {
-				updatedOn: Date.now(),
-				createdOn: Date.now()
-			}
+			createdOn: this.instantiatedOn
+		}
 	}
 	set meta(value){
-		if(value && (value.updatedOn || value.createdOn)){
-			this.person.meta = value;
-		} else {
-			this.person.meta = {
-				updatedOn: Date.now(),
-				createdOn: Date.now()
-			}
-		}
-		this._renderTimer()
+		this.person.meta = value;
 	}
 
 	get person(){ return this.model.person || {}; }
@@ -145,19 +146,20 @@ class UIContactCard extends HTMLElement {
 	}
 
 	get updatedOn(){
-		let result = moment(this.meta.updatedOn).fromNow();
-		result = `Updated ${result}`;
+		let result = null;
+		if(this.meta.updatedOn){
+			result = `Updated ${moment(this.meta.updatedOn).fromNow()}`;
+		}
 		return result;
 	}
 
 	set updatedOn(date){
-		console.log('UPDATED ON UPDATED')
-		this.meta.updatedOn = parseInt(date);
+		this.meta.updatedOn = date;
 		this._renderTimer();
 	}
 
 	get createdOn(){
-		let result = moment(this.meta.createdOn).fromNow();
+		let result = moment(this.meta.createdOn || this.meta.instantiatedOn).fromNow();
 		result = `Created ${result}`;
 		return result;
 	}
@@ -280,6 +282,9 @@ class UIContactCard extends HTMLElement {
 			case 'edit':
 				this.editing = (newVal == 'true');
 				break;
+			case 'action':
+				this.action = newVal;
+				break;
 			default:
 				console.warn(`Attribute ${attrName} is not handled, you should probably do that`);
 		}
@@ -287,6 +292,7 @@ class UIContactCard extends HTMLElement {
 
 	_initViewReferences(){
 		//VIEW
+		this.$form = this.shadowRoot.querySelector('form');
 		this.$container = this.shadowRoot.querySelector('.container');
 		this.$editButton = this.shadowRoot.querySelector('#editButton');
 		this.$doneButton = this.shadowRoot.querySelector('#doneButton');
@@ -416,6 +422,7 @@ class UIContactCard extends HTMLElement {
 	}
 
 	_populateViewFields(){
+		this.$form.action = this.action;
 		this.$fullNameHeader.innerHTML = this.fullName || "New Contact";
 		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 		this.$email.innerHTML = this.email || 'add email';
@@ -550,6 +557,7 @@ class UIContactCard extends HTMLElement {
 		this._renderMainView(true);
 		this._renderEditor(false);
 		this._emitEvent('update');
+		this.$form.submit();
 	}
 
 	edit(e){
@@ -622,11 +630,8 @@ class UIContactCard extends HTMLElement {
       value = value.charAt(0).toUpperCase() + value.slice(1);;
       e.target.value = value;
       $error.innerHTML = '';
-
-			if(person[property] !== value){
-				person[property] = value;
-				this.updatedOn = Date.now();
-			}
+			person[property] = value;
+			this.updatedOn = Date.now();
     } else if(isSpace){
       value = value.replace(this.spaceRegex, '');
       e.target.value = value;
@@ -673,10 +678,8 @@ class UIContactCard extends HTMLElement {
         $error.innerHTML = '';
 				e.target.classList.remove('error-input');
 				this.$emailDivider.classList.remove('error-border')
-				if(person[property] !== value){
-					person[property] = e.target.value;
-					this.updatedOn = Date.now();
-				}
+				person[property] = e.target.value;
+				this.updatedOn = Date.now();
       }
 		}
 		else if(isSpace){
@@ -734,16 +737,12 @@ class UIContactCard extends HTMLElement {
       if(isValid){
         $error.innerHTML = '';
         e.target.classList.remove('error-input');
-				if(person[property] !== e.target.value){
-					person.telephone = telephone;
-					this.updatedOn = Date.now();
-				}
+				person.telephone = telephone;
+				this.updatedOn = Date.now();
 			}
 			else if(isBlurEvent && isValid){
-				if(person[property] !== telephone){
-					person[property] = telephone;
-					this.updatedOn = Date.now();
-				}
+				person[property] = telephone;
+				this.updatedOn = Date.now();
 			}
 			else if(isNotValid && isNotBlank && isBlurEvent) {
         e.target.classList.add('error-input');
