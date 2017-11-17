@@ -552,9 +552,16 @@ class UIContactCard extends HTMLElement {
 	}
 
 	clear(){
+		this.$fullNameHeader.innerHTML = 'New Contact';
+		this.$givenNameInput.value = '';
+		this.$familyNameInput.value = '';
+		this.$telephoneInput.value = '';
+		this.$emailInput.value = '';
+		this.$emergencyGivenNameInput.value = '';
+		this.$emergencyFamilyNameInput.value = '';
+		this.$emergencyTelephoneInput.value = '';
 		this.person = {};
-		this._populateEditorFields();
-		this._populateViewFields();
+
 	}
 
 	_call(e){
