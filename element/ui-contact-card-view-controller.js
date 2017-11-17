@@ -6,7 +6,7 @@ const uiContactCardTemplate = uiContactCardDoc.ownerDocument.querySelector('#ui-
 class UIContactCard extends HTMLElement {
 
 	static get observedAttributes(){
-		return ['person', 'edit', 'action', 'csrf'];
+		return ['person', 'edit'];
 	}
 
 	constructor(model){
@@ -24,7 +24,6 @@ class UIContactCard extends HTMLElement {
 		this.state = {};
 		this.state.connected = false;
 		this.state.editing = false;
-		this.state.action = '/people/create';
 
 		this.SPACE_KEY = 32;
 		this.spaceRegex = /\s+/g;
@@ -40,13 +39,6 @@ class UIContactCard extends HTMLElement {
 
 	get shadowRoot(){return this._shadowRoot;}
 	set shadowRoot(value){ this._shadowRoot = value}
-
-	get action(){
-		return this.state.action || '/people/create';
-	}
-	set action(value){
-		this.state.action = value;
-	}
 
 	get connected(){ return this.state.connected; }
 	set connected(value){ this.state.connected = value; }
@@ -281,12 +273,6 @@ class UIContactCard extends HTMLElement {
 			case 'edit':
 				this.editing = (newVal == 'true');
 				break;
-			case 'action':
-				this.action = newVal;
-				break;
-			case 'csrf':
-				this.csrfToken = newVal;
-				break;
 			default:
 				console.warn(`Attribute ${attrName} is not handled, you should probably do that`);
 		}
@@ -294,8 +280,6 @@ class UIContactCard extends HTMLElement {
 
 	_initViewReferences(){
 		//VIEW
-		this.$form = this.shadowRoot.querySelector('form');
-		this.$csrfToken = this.shadowRoot.querySelector('#csrfToken');
 		this.$container = this.shadowRoot.querySelector('.container');
 		this.$editButton = this.shadowRoot.querySelector('#editButton');
 		this.$doneButton = this.shadowRoot.querySelector('#doneButton');
@@ -425,8 +409,6 @@ class UIContactCard extends HTMLElement {
 	}
 
 	_populateViewFields(){
-		this.$form.action = this.action;
-		this.$csrfToken.value = this.csrfToken;
 		this.$fullNameHeader.innerHTML = this.fullName || "New Contact";
 		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 		this.$email.innerHTML = this.email || 'add email';
@@ -561,7 +543,6 @@ class UIContactCard extends HTMLElement {
 		this._renderMainView(true);
 		this._renderEditor(false);
 		this._emitEvent('update');
-		this.$form.submit();
 	}
 
 	edit(e){
