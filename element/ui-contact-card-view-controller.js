@@ -78,6 +78,7 @@ class UIContactCard extends HTMLElement {
 			createdOn: this.instantiatedOn
 		}
 	}
+
 	set meta(value){
 		this.person.meta = value;
 	}
@@ -86,29 +87,14 @@ class UIContactCard extends HTMLElement {
 	set person(value){
 		this.model.person = value || this.model.person || {};
 		this.meta = this.model.person.meta;
-		this.waitForConnection().then(connected => {
-			if(this.editing){
-				this._populateEditorFields();
-				this._renderEditor();
-			} else {
-				this._populateViewFields();
-				this._renderMainView();
-			}
-		})
+		this.render()
 	}
 
+	//THIS IS THE HEART OF THE DISPLAY LOGIC
 	get editing(){ return this.state.editing; }
 	set editing(isEditing){
 		this.state.editing = isEditing;
-		let isNotEditing = !isEditing;
-		if(isEditing){
-			this.waitForConnection().then(connected => {
-				this._clearEditorErrors();
-				this._populateEditorFields();
-				this._renderEditor(true);
-				this._renderMainView(false);
-			})
-		}
+		this.render()
 	}
 
 	get hasName(){
@@ -142,6 +128,7 @@ class UIContactCard extends HTMLElement {
 		return fullName;
 	}
 
+
 	get updatedOn(){
 		let result = null;
 		if(this.meta.updatedOn){
@@ -149,22 +136,22 @@ class UIContactCard extends HTMLElement {
 		}
 		return result;
 	}
-
 	set updatedOn(date){
 		this.meta.updatedOn = date;
 		this._renderTimer();
 	}
+
 
 	get createdOn(){
 		let result = moment(this.meta.createdOn || this.meta.instantiatedOn).fromNow();
 		result = `Created ${result}`;
 		return result;
 	}
-
 	set createdOn(date){
 		this.meta.createdOn = parseInt(date);
 		this._renderTimer();
 	}
+
 
 	get telephone(){
 		let telephone = null;
@@ -191,6 +178,12 @@ class UIContactCard extends HTMLElement {
 		return result;
 	}
 
+	get hasEmergencyTelephone(){
+		return (this.hasEmergencyContact && this.emergencyContact.telephone);
+	}
+
+
+
 	set emergencyContact(value){
 		if(this.hasEmergencyContact){
 			this.person.knows[0] = value;
@@ -200,7 +193,6 @@ class UIContactCard extends HTMLElement {
 			this.person.knows.push({});
 		}
 	}
-
 	get emergencyContact(){
 		if(!this.hasEmergencyContact){
 			this.person.knows = [];
@@ -208,6 +200,7 @@ class UIContactCard extends HTMLElement {
 		}
 		return this.person.knows[0];
 	}
+
 
 	get emergencyGivenName(){
 		let givenName = null;
@@ -265,12 +258,7 @@ class UIContactCard extends HTMLElement {
 	connectedCallback() {
 		this._initViewReferences();
 		this._initEventListeners();
-
-		this._populateViewFields();
-		this._populateEditorFields();
-
-		this._renderEditor(this.editing);
-		this._renderMainView(!this.editing);
+		this.render();
 		//Updates view minute
 		this.liveRendering = setInterval(e => {
 			this._renderTimer();
@@ -282,7 +270,6 @@ class UIContactCard extends HTMLElement {
 		switch(attrName){
 			case 'person':
 				this.person = JSON.parse(newVal);
-				console.log(this.person)
 				break;
 			case 'edit':
 				this.editing = (newVal == 'true');
@@ -300,7 +287,7 @@ class UIContactCard extends HTMLElement {
 		this.$deleteButton = this.shadowRoot.querySelector('#deleteButton');
 		this.$fullNameHeader = this.shadowRoot.querySelector('#fullNameHeader');
 		this.$updatedOn = this.shadowRoot.querySelector('#updatedOn');
-		this.$fullNameView = this.shadowRoot.querySelector('#fullNameView');
+		this.$addName = this.shadowRoot.querySelector('#addName');
 		this.$telephoneActionButton = this.shadowRoot.querySelector('#telephoneActionButton');
 		this.$telephoneActionLabel = this.shadowRoot.querySelector('#telephoneActionLabel');
 		this.$telephoneIcon = this.shadowRoot.querySelector('#telephoneIcon');
@@ -367,16 +354,15 @@ class UIContactCard extends HTMLElement {
 			let notEditing = !this.editing;
 			if(notEditing){
 				e.email = this.email;
-				this._email(e);
+				this._emailing(e);
 			}
-			else { this._renderEditor(); }
 		});
 
 		this.$email.addEventListener('click', e => {
 			let notEditing = !this.editing;
 			if(notEditing){
 				e.email = this.email;
-				this._email(e);
+				this._emailing(e);
 			}
 		});
 
@@ -384,12 +370,11 @@ class UIContactCard extends HTMLElement {
 			let notEditing = !this.editing;
 			if(notEditing){
 				e.telephone = this.person.telephone;
-				this._call(e);
+				this._calling(e);
 			}
-			else { this._renderEditor(); }
 		});
 
-		this.$fullNameView.addEventListener('click', e => {
+		this.$addName.addEventListener('click', e => {
 			this.editing = true;
 			this.$givenNameInput.focus();
 		})
@@ -398,7 +383,7 @@ class UIContactCard extends HTMLElement {
 			let notEditing = !this.editing;
 			if(notEditing){
 				e.telephone = this.person.telephone;
-				this._call(e);
+				this._calling(e);
 			}
 		});
 
@@ -412,10 +397,25 @@ class UIContactCard extends HTMLElement {
 			let notEditing = !this.editing;
 			if(this.hasEmergencyContact && notEditing ){
 				e.telephone = this.person.knows[0].telephone;
-				this._call(e);
+				this._calling(e);
 			}
 		});
 
+	}
+
+
+	render(){
+		this.waitForConnection().then(connected => {
+			if(this.editing){
+				this._populateEditorFields();
+				this._renderMainView(false);
+				this._renderEditor();
+			} else {
+				this._populateViewFields();
+				this._renderMainView();
+				this._renderEditor(false);
+			}
+		})
 	}
 
 	_renderTimer(){
@@ -427,70 +427,9 @@ class UIContactCard extends HTMLElement {
 		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 		this.$email.innerHTML = this.email || 'add email';
 		this.$telephone.innerHTML = this.telephone || 'add number';
-
 		//EMERGENCY CONTACT
-		if(this.hasEmergencyContact){
-			this.$addEmergencyContactButton.classList.add('hide-view');
-			this.$emergencyFullName.classList.remove('hide-view');
-			this.$emergencyTelephone.classList.remove('hide-view');
-			this.$emergencyFullName.innerHTML = this.emergencyFullName || '';
-			this.$emergencyTelephone.innerHTML = this.emergencyTelephone || 'add number';
-		} else {
-			this.$addEmergencyContactButton.classList.remove('hide-view');
-			this.$emergencyTelephone.classList.add('hide-view');
-			this.$emergencyFullName.classList.add('hide-view');
-			//No emergency contact, add one
-		}
-	}
-
-	//CHANGE SHOW VAR NAME, IT"S CONFUSING
-	_renderEditor(show=true){
-		let activeHeader = show? 'active-header' : 'inactive-header';
-		let inactiveHeader = show? 'inactive-header' : 'active-header';
-		this.$fullNameHeader.classList.add(inactiveHeader);
-		this.$fullNameHeader.classList.remove(activeHeader);
-
-		let activeBorder = show? 'active-border' : 'inactive-border';
-		let inactiveBorder = show? 'inactive-border' : 'active-border';
-		let activeText = show? 'active-text' : 'inactive-text';
-		let inactiveText = show? 'inactive-text' : 'active-text';
-		let activeBackground = show? 'active-background' : 'inactive-background';
-		let inactiveBackground = show? 'inactive-background' : 'active-background';
-		this.$telephoneActionButton.classList.add(inactiveBackground);
-		this.$telephoneActionButton.classList.remove(activeBackground);
-		this.$telephoneActionLabel.classList.add(inactiveText);
-		this.$telephoneActionLabel.classList.remove(activeText);
-		this.$emailActionButton.classList.add(inactiveBackground);
-		this.$emailActionButton.classList.remove(activeBackground);
-		this.$emailActionLabel.classList.add(inactiveText);
-		this.$emailActionLabel.classList.remove(activeText);
-		this.$dividers.forEach( $divider => {
-			$divider.classList.add(activeBorder);
-			$divider.classList.remove(inactiveBorder);
-		})
-
-		//Show or hide views
-		let addClass = show? 'show-view' : 'hide-view';
-		let removeClass = show? 'hide-view' : 'show-view';
-		this.$fullNameEdit.classList.add(addClass);
-		this.$fullNameEdit.classList.remove(removeClass);
-		this.$telephoneEdit.classList.add(addClass);
-		this.$telephoneEdit.classList.remove(removeClass);
-		this.$emailEdit.classList.add(addClass);
-		this.$emailEdit.classList.remove(removeClass);
-		this.$emergencyFullNameEdit.classList.add(addClass);
-		this.$emergencyFullNameEdit.classList.remove(removeClass);
-		this.$emergencyTelephoneEdit.classList.add(addClass);
-		this.$emergencyTelephoneEdit.classList.remove(removeClass);
-		this.$doneButton.classList.add(addClass);
-		this.$doneButton.classList.remove(removeClass);
-		this.$deleteButton.classList.add(addClass);
-		this.$deleteButton.classList.remove(removeClass);
-		//Hidden (removes from layout)
-		this.$addEmergencyContactButton.hidden = show;
-
-		this.$fullNameView.classList.remove('show-view');
-		this.$fullNameView.classList.add('hide-view');
+		this.$emergencyFullName.innerHTML = this.emergencyFullName || '';
+		this.$emergencyTelephone.innerHTML = this.emergencyTelephone || 'add number';
 	}
 
 	_populateEditorFields(){
@@ -499,10 +438,46 @@ class UIContactCard extends HTMLElement {
 		this.$familyNameInput.value = this.familyName || '';
 		this.$telephoneInput.value = this.telephone || '';
 		this.$emailInput.value = this.email || '';
-		if(this.hasEmergencyContact){
-			this.$emergencyGivenNameInput.value = this.emergencyGivenName || '';
-			this.$emergencyFamilyNameInput.value = this.emergencyFamilyName || '';
-			this.$emergencyTelephoneInput.value = this.emergencyTelephone || '';
+		this.$emergencyGivenNameInput.value = this.emergencyGivenName || '';
+		this.$emergencyFamilyNameInput.value = this.emergencyFamilyName || '';
+		this.$emergencyTelephoneInput.value = this.emergencyTelephone || '';
+	}
+
+
+
+	//CHANGE SHOW VAR NAME, IT"S CONFUSING
+	_renderEditor(show=true){
+		if(show){
+			this.$fullNameHeader.classList.add('inactive-header');
+			this.$telephoneActionButton.classList.add('inactive-background');
+			this.$telephoneActionLabel.classList.add('inactive-text');
+			this.$emailActionButton.classList.add('inactive-background');
+			this.$emailActionLabel.classList.add('inactive-text');
+			this.$dividers.forEach( $divider => { $divider.classList.add('active-border'); })
+
+			this.$fullNameEdit.hidden = false;
+			this.$telephoneEdit.hidden = false;
+			this.$emailEdit.hidden = false;
+			this.$emergencyFullNameEdit.hidden = false;
+			this.$emergencyTelephoneEdit.hidden = false;
+			this.$doneButton.hidden = false;
+			this.$deleteButton.hidden = false;
+		}
+		else {
+			this.$fullNameHeader.classList.remove('inactive-header');
+			this.$telephoneActionButton.classList.remove('inactive-background');
+			this.$telephoneActionLabel.classList.remove('inactive-text');
+			this.$emailActionButton.classList.remove('inactive-background');
+			this.$emailActionLabel.classList.remove('inactive-text');
+			this.$dividers.forEach( $divider => { $divider.classList.remove('active-border'); })
+
+			this.$fullNameEdit.hidden = true;
+			this.$telephoneEdit.hidden = true;
+			this.$emailEdit.hidden = true;
+			this.$emergencyFullNameEdit.hidden = true;;
+			this.$emergencyTelephoneEdit.hidden = true;
+			this.$doneButton.hidden = true;
+			this.$deleteButton.hidden = true;
 		}
 	}
 
@@ -511,37 +486,32 @@ class UIContactCard extends HTMLElement {
 	}
 
 	_renderMainView(show=true){
-		//If show is true, add class is show-view
-		let addClass = show? 'show-view' : 'hide-view';
-		//If show is false, add class is hide-view
-		let removeClass = show? 'hide-view' : 'show-view';
-		this.$telephoneView.classList.add(addClass);
-		this.$telephoneView.classList.remove(removeClass);
-		this.$emailView.classList.add(addClass);
-		this.$emailView.classList.remove(removeClass);
-		this.$emergencyFullNameView.classList.add(addClass);
-		this.$emergencyFullNameView.classList.remove(removeClass);
-		this.$emergencyTelephoneView.classList.add(addClass);
-		this.$emergencyTelephoneView.classList.remove(removeClass);
-		this.$editButton.classList.add(addClass);
-		this.$editButton.classList.remove(removeClass);
+		if(show){
+			this.$telephoneView.hidden = false;
+			this.$emailView.hidden = false;
+			this.$emergencyFullNameView.hidden = false;
+			this.$editButton.hidden = false;
 
-		if(this.hasName){
-			this.$fullNameView.classList.add('hide-view');
-			this.$fullNameView.classList.remove('show-view');
+			this.$addName.hidden = this.hasName;
+			this.$addEmergencyContactButton.hidden = this.hasEmergencyContact;
+			let hasEmergencyContactButNoPhone = (!this.hasEmergencyContact && !this.hasEmergencyTelephone);
+			this.$emergencyTelephoneView.hidden = hasEmergencyContactButNoPhone;
 		}
-		//No name contact
 		else {
-			this.$fullNameView.classList.add('show-view');
-			this.$fullNameView.classList.remove('hide-view');
+			this.$telephoneView.hidden = true;
+			this.$emailView.hidden = true;
+			this.$emergencyFullNameView.hidden = true;
+			this.$emergencyTelephoneView.hidden = true;
+			this.$editButton.hidden = true;
+			this.$addName.hidden = true;
+			this.$addEmergencyContactButton.hidden = true;
 		}
 	}
 
 	_emitEvent(event='update'){
 		let data = {};
-		data.meta = this.meta;
-		data.model = this.model;
-		data.state = this.state;
+		data.person = this.model.person;
+		data.person.meta = this.meta;
 		this.dispatchEvent(new CustomEvent(event, {detail: data}));
 	}
 
@@ -552,20 +522,16 @@ class UIContactCard extends HTMLElement {
 
 	done(e){
 		this.editing = false;
-		this._populateViewFields();
-		this._renderMainView(true);
-		this._renderEditor(false);
 		this._emitEvent('update');
 	}
 
 	edit(e){
+		//Setter handles everything
 		this.editing = true;
-		this._populateEditorFields();
-		this._renderEditor(true);
-		this._renderMainView(false);
 	}
 
 	clear(){
+		this.person = {};
 		this.$fullNameHeader.innerHTML = 'New Contact';
 		this.$givenNameInput.value = '';
 		this.$familyNameInput.value = '';
@@ -574,11 +540,9 @@ class UIContactCard extends HTMLElement {
 		this.$emergencyGivenNameInput.value = '';
 		this.$emergencyFamilyNameInput.value = '';
 		this.$emergencyTelephoneInput.value = '';
-		this.person = {};
-
 	}
 
-	_call(e){
+	_calling(e){
 		if(e.telephone && !this.editing){
 			window.location.href = `tel:${e.telephone}`;
 			this.$telephoneIcon.classList.remove("fa-phone","fa-2x");
@@ -596,7 +560,7 @@ class UIContactCard extends HTMLElement {
 		}
 	}
 
-	_email(e){
+	_emailing(e){
 		if(e.email && !this.editing){
 			window.location.href = `mailto:${this.email}`;
 			let animationDuration = 3000;
@@ -619,7 +583,6 @@ class UIContactCard extends HTMLElement {
 		clearInterval(this.liveRendering);
 		//TODO: Remove DOM References, events, etc
 		//this.$editButton.removeEventListener('click', this.edit.bind(this))
-		console.log('disconnectedCallback')
 	}
 
   updateName(e, person, property, $error){
@@ -732,61 +695,56 @@ class UIContactCard extends HTMLElement {
 
   updateTelephone(e, person, property, $error){
 
-		e.target.classList.remove('error-input');
-		var telephone = e.target.value.replace(/\D/g, '');
-		e.target.value = this.formatTelephoneNumber(e.target.value)
-		let numDigits = telephone.length;
-		numDigits += numDigits >= 6? 4 : 0;
-		numDigits += numDigits >= 3 && numDigits < 6? 3 : 0;
-		numDigits += numDigits < 3? 1 : 0;
-		e.target.setSelectionRange(numDigits,numDigits)
-		var isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
-		var isNotBlank = !isBlank;
-		var isValid = this.telephoneRegex.test(e.target.value);
-		var isNotValid = !isValid;
-		var lostFocus = e.type === 'focusout';
-
 
     if(e.inputType !== 'deleteContentBackward'){
+			e.target.classList.remove('error-input');
+			var telephone = e.target.value.replace(/\D/g, '');
+			e.target.value = this.formatTelephoneNumber(e.target.value)
+			let numDigits = telephone.length;
+			numDigits += numDigits >= 6? 4 : 0;
+			numDigits += numDigits >= 3 && numDigits < 6? 3 : 0;
+			numDigits += numDigits < 3? 1 : 0;
+			e.target.setSelectionRange(numDigits,numDigits)
+			var isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
+			var isNotBlank = !isBlank;
+			var isValid = this.telephoneRegex.test(e.target.value);
+			var isNotValid = !isValid;
+			var lostFocus = e.type === 'focusout';
+
       if(isValid){
-				console.log('VALID', telephone )
         $error.innerHTML = '';
         e.target.classList.remove('error-input');
 				person.telephone = telephone;
 				this.updatedOn = Date.now();
 			}
 			if(lostFocus && isValid){
-				console.log('BLUR VALID')
 				person.telephone = telephone;
 				this.updatedOn = Date.now();
 			}
 			if(isNotValid && isNotBlank && lostFocus) {
-				console.log('INVALID, BLANK, BLUR')
         e.target.classList.add('error-input');
 				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
 			}
 			if(isNotValid && lostFocus) {
-				console.log('INVALID, BLUR')
         e.target.classList.add('error-input');
 				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
 			}
-
     }
-    //DELETING
+    //DELETING considers formatting
     else {
-			console.log('INVALID', telephone)
+			console.log(e.target.value.length)
       let value = e.target.value;
       let lastIndex = value.length - 1;
-      let nextChar = value.charAt(lastIndex)
-      let secondToLastChar = value.charAt(lastIndex-1)
-      if(nextChar === '-'){
-        e.target.value = value.substring(0, lastIndex);
-      }else if(nextChar === ' '){
-        e.target.value = value.substring(0, lastIndex);
-        e.target.setSelectionRange(lastIndex-1,lastIndex-1)
-      }else if(secondToLastChar === '('){
-        e.target.value = '';
-      }
+			switch(e.target.value.length){
+				case 10:
+        	e.target.value = value.substring(0, 9);
+					break;
+				case 6:
+        	e.target.value = value.substring(1, 4);
+					break;
+				default:
+					//Nothing
+			}
     }
   }
 
