@@ -30,6 +30,7 @@
     "webpack": "^3.3.0"
   },
   "dependencies": {
+    "browser-request": "^0.3.3",
     "moment": "^2.19.2"
   }
 }
