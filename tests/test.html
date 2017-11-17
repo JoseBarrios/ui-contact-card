@@ -9,7 +9,7 @@
 
 <body style="padding:0px;margin:0px;width:100%;height:100%;background-color:#e8ebf2">
 	<div style="width:50%;margin:25%;margin-top:2.5%;float:left">
-		<ui-contact-card id="interactiveCard" action="/people/create"></ui-contact-card>
+		<ui-contact-card id="interactiveCard" action="/people/create" ></ui-contact-card>
 	</div>
 
 	<div style="width:40%;margin:5%;margin-top:2.5%;float:left">
@@ -89,17 +89,17 @@
 		update.knows = [];
 		update.knows.push(getRandom(people));
 
-		interactiveCard.setAttribute('person', JSON.stringify(update));
+		//interactiveCard.setAttribute('person', JSON.stringify(update));
 
 		update = getRandom(people);
 		update.knows = [];
 		update.knows.push(getRandom(people));
-		card.setAttribute('person', JSON.stringify(update));
+		//card.setAttribute('person', JSON.stringify(update));
 
 		update = getRandom(people)
 		update.knows = [];
 		update.knows.push(getRandom(people));
-		editableCard.setAttribute('person', JSON.stringify(update));
+		//editableCard.setAttribute('person', JSON.stringify(update));
 
 		setInterval(e => {
 			var people = [];
@@ -120,7 +120,7 @@
 			update.knows.push(getRandom(people));
 			editableCard.setAttribute('person', JSON.stringify(update));
 
-		}, 1000)
+		}, 100000000000000000000)
 
 	});
 </script>

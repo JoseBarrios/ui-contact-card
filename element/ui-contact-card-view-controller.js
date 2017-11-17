@@ -12,6 +12,11 @@ class UIContactCard extends HTMLElement {
 	constructor(model){
 		super();
 		this.model = model || {};
+		//SET DEFAULTS, IF PERSON AND KNOWS DO NOT EXIST
+		this.model.person = this.model.person || {};
+		this.model.person.knows = this.model.person.knows || [];
+		this.model.person.knows[0] = this.model.person.knows[0] || {};
+
 		const view = document.importNode(uiContactCardTemplate.content, true);
 		this.shadowRoot = this.attachShadow({mode: 'open'});
 		this.shadowRoot.appendChild(view);
@@ -195,10 +200,6 @@ class UIContactCard extends HTMLElement {
 	}
 
 	get emergencyContact(){
-		if(!this.hasEmergencyContact){
-			this.person.knows = [];
-			this.person.knows.push({})
-		}
 		return this.person.knows[0];
 	}
 
@@ -275,6 +276,7 @@ class UIContactCard extends HTMLElement {
 		switch(attrName){
 			case 'person':
 				this.person = JSON.parse(newVal);
+				console.log(this.person)
 				break;
 			case 'edit':
 				this.editing = (newVal == 'true');
@@ -348,20 +350,20 @@ class UIContactCard extends HTMLElement {
 		this.$doneButton.addEventListener('click', this.done.bind(this))
 
   	this.$givenNameInput.addEventListener('keyup', (e) => this.updateName(e, this.person, 'givenName', this.$givenNameError) );
-  	this.$givenNameInput.addEventListener('blur', (e) => this.updateName(e, this.person, 'givenName', this.$givenNameError) );
+  	this.$givenNameInput.addEventListener('focusout', (e) => this.updateName(e, this.person, 'givenName', this.$givenNameError) );
   	this.$familyNameInput.addEventListener('keyup', (e) => this.updateName(e, this.person, 'familyName', this.$familyNameError) );
-  	this.$familyNameInput.addEventListener('blur', (e) => this.updateName(e, this.person, 'familyName', this.$familyNameError) );
+  	this.$familyNameInput.addEventListener('focusout', (e) => this.updateName(e, this.person, 'familyName', this.$familyNameError) );
 		this.$emailInput.addEventListener('keyup', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
-		this.$emailInput.addEventListener('blur', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
+		this.$emailInput.addEventListener('focusout', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
 		this.$telephoneInput.addEventListener('input', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
-		this.$telephoneInput.addEventListener('blur', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
+		this.$telephoneInput.addEventListener('focusout', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
 
   	this.$emergencyGivenNameInput.addEventListener('keyup', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
-  	this.$emergencyGivenNameInput.addEventListener('blur', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
+  	this.$emergencyGivenNameInput.addEventListener('focusout', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
   	this.$emergencyFamilyNameInput.addEventListener('keyup', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
-  	this.$emergencyFamilyNameInput.addEventListener('blur', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
+  	this.$emergencyFamilyNameInput.addEventListener('focusout', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
 		this.$emergencyTelephoneInput.addEventListener('input', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
-		this.$emergencyTelephoneInput.addEventListener('blur', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
+		this.$emergencyTelephoneInput.addEventListener('focusout', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
 
 		this.$emailActionButton.addEventListener('click', e => {
 			let notEditing = !this.editing;
@@ -619,7 +621,7 @@ class UIContactCard extends HTMLElement {
     let isNotAlphabetical = isAlphabetical;
     let isNotSpace = (keyCode !== this.SPACE_KEY);
     let isNotBlank = e.target.value && e.target.value !== "";
-    let isBlurEvent = e.type === 'blur';
+    let lostFocus = e.type === 'focusout';
     let isBlank = !isNotBlank;
     let isSpace = !isNotSpace;
     let isValid = (isNotBlank && isNotSpace && isAlphabetical);
@@ -643,7 +645,7 @@ class UIContactCard extends HTMLElement {
       value = value.replace(this.digitRegex, '')
       value = value.replace(this.nonAlphabeticalRegex, '')
       e.target.value = value;
-    } else if(isBlank && isBlurEvent && personHasProperty){
+    } else if(isBlank && lostFocus && personHasProperty){
       $error.innerHTML = 'cannot be blank, used last known name instead';
       e.target.value = person[property];
     }
@@ -651,12 +653,13 @@ class UIContactCard extends HTMLElement {
   }
 
   updateEmail(e, person, property, $error){
+		e.target.classList.remove('error-input');
     var keyCode = e.which || e.keyCode || e.keyIdentifier || 0;
-    let isNotSpace = (keyCode !== this.SPACE_KEY);
-    let isSpace = !isNotSpace;
-    let isNotBlank = e.target.value && e.target.value !== "";
-    let isBlank = !isNotBlank;
-    let isBlurEvent = e.type === 'blur';
+    var isNotSpace = (keyCode !== this.SPACE_KEY);
+    var isSpace = !isNotSpace;
+    var isNotBlank = e.target.value && e.target.value !== "";
+    var isBlank = !isNotBlank;
+    var lostFocus = e.type === 'focusout';
 
     let isValid = isNotSpace;
     let personHasProperty = person[property];
@@ -668,7 +671,7 @@ class UIContactCard extends HTMLElement {
     if(isValid){
       let isEmail = this.emailRegex.test(value);
       let isNotEmail = !isEmail;
-      if(isNotEmail && isNotBlank && isBlurEvent){
+      if(isNotEmail && isNotBlank && lostFocus){
         $error.innerHTML = 'must be valid (e.g., your@email.com)';
 				this.$emailDivider.classList.add('error-border')
 				e.target.classList.add('error-input');
@@ -676,7 +679,7 @@ class UIContactCard extends HTMLElement {
         $error.innerHTML = '';
 				e.target.classList.remove('error-input');
 				this.$emailDivider.classList.remove('error-border')
-      } else if(isEmail && isBlurEvent){
+      } else if(isEmail && lostFocus){
         $error.innerHTML = '';
 				e.target.classList.remove('error-input');
 				this.$emailDivider.classList.remove('error-border')
@@ -722,37 +725,49 @@ class UIContactCard extends HTMLElement {
 
   updateTelephone(e, person, property, $error){
 
-    if(e.inputType !== 'deleteContentBackward'){
-      e.target.value = this.formatTelephoneNumber(e.target.value)
-      let telephone = e.target.value.replace(/\D/g, '');
-      let numDigits = telephone.length;
-      numDigits += numDigits >= 6? 4 : 0;
-      numDigits += numDigits >= 3 && numDigits < 6? 3 : 0;
-      numDigits += numDigits < 3? 1 : 0;
-      e.target.setSelectionRange(numDigits,numDigits)
-      let isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
-      let isNotBlank = !isBlank;
-      let isValid = this.telephoneRegex.test(e.target.value);
-      let isNotValid = !isValid;
-      let isBlurEvent = e.type === 'blur';
+		e.target.classList.remove('error-input');
+		var telephone = e.target.value.replace(/\D/g, '');
+		e.target.value = this.formatTelephoneNumber(e.target.value)
+		let numDigits = telephone.length;
+		numDigits += numDigits >= 6? 4 : 0;
+		numDigits += numDigits >= 3 && numDigits < 6? 3 : 0;
+		numDigits += numDigits < 3? 1 : 0;
+		e.target.setSelectionRange(numDigits,numDigits)
+		var isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
+		var isNotBlank = !isBlank;
+		var isValid = this.telephoneRegex.test(e.target.value);
+		var isNotValid = !isValid;
+		var lostFocus = e.type === 'focusout';
 
+
+    if(e.inputType !== 'deleteContentBackward'){
       if(isValid){
+				console.log('VALID', telephone )
         $error.innerHTML = '';
         e.target.classList.remove('error-input');
 				person.telephone = telephone;
 				this.updatedOn = Date.now();
 			}
-			else if(isBlurEvent && isValid){
-				person[property] = telephone;
+			if(lostFocus && isValid){
+				console.log('BLUR VALID')
+				person.telephone = telephone;
 				this.updatedOn = Date.now();
 			}
-			else if(isNotValid && isNotBlank && isBlurEvent) {
+			if(isNotValid && isNotBlank && lostFocus) {
+				console.log('INVALID, BLANK, BLUR')
         e.target.classList.add('error-input');
 				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
 			}
+			if(isNotValid && lostFocus) {
+				console.log('INVALID, BLUR')
+        e.target.classList.add('error-input');
+				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
+			}
+
     }
     //DELETING
     else {
+			console.log('INVALID', telephone)
       let value = e.target.value;
       let lastIndex = value.length - 1;
       let nextChar = value.charAt(lastIndex)
