@@ -551,6 +551,12 @@ class UIContactCard extends HTMLElement {
 		this._renderMainView(false);
 	}
 
+	clear(){
+		this.person = {};
+		this._populateEditorFields();
+		this._populateViewFields();
+	}
+
 	_call(e){
 		if(e.telephone && !this.editing){
 			window.location.href = `tel:${e.telephone}`;
