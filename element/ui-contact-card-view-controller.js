@@ -195,12 +195,9 @@ class UIContactCard extends HTMLElement {
 	}
 
 	get emergencyContact(){
-		let hasEmergencyContact = this.person.knows && this.person.knows.length;
-		let doesNotHaveEmergencyContact = !hasEmergencyContact;
-		//If it doesn't have one, add it
-		if(doesNotHaveEmergencyContact){
-			this.model.person.knows = [];
-			this.model.person.knows.push({})
+		if(!this.hasEmergencyContact){
+			this.person.knows = [];
+			this.person.knows.push({})
 		}
 		return this.person.knows[0];
 	}
@@ -562,7 +559,7 @@ class UIContactCard extends HTMLElement {
 		this._renderMainView(true);
 		this._renderEditor(false);
 		this._emitEvent('update');
-		this.$form.submit();
+		//this.$form.submit();
 	}
 
 	edit(e){
