@@ -199,8 +199,8 @@ class UIContactCard extends HTMLElement {
 		let doesNotHaveEmergencyContact = !hasEmergencyContact;
 		//If it doesn't have one, add it
 		if(doesNotHaveEmergencyContact){
-			this.meta.person.knows = [];
-			this.meta.person.knows.push({});
+			this.model.person.knows = [];
+			this.model.person.knows.push({});
 		}
 		return this.person.knows[0];
 	}
