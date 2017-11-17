@@ -191,7 +191,21 @@ class UIContactCard extends HTMLElement {
 		return result;
 	}
 
+	set emergencyContact(value){
+		if(this.hasEmergencyContact){
+			this.person.knows[0] = value;
+		}
+		else {
+			this.person.knows = [];
+			this.person.knows.push({});
+		}
+	}
+
 	get emergencyContact(){
+		if(!this.hasEmergencyContact){
+			this.person.knows = [];
+			this.person.knows.push({});
+		}
 		return this.person.knows[0];
 	}
 
