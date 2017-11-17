@@ -533,8 +533,7 @@ class UIContactCard extends HTMLElement {
 
 	//Removes the card from view, and disconnects element from DOM
 	delete(e){
-		this.visible = false;
-		this.parentNode.removeChild(this);
+		this._emitEvent('delete');
 	}
 
 	done(e){

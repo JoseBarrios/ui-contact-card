@@ -84,6 +84,7 @@
 		card.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
 		editableCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
 		interactiveCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
+		interactiveCard.addEventListener('delete', e=> { console.log('DELETE', e.detail); });
 
 		let update = getRandom(people);
 		update.knows = [];
