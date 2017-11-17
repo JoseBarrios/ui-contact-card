@@ -81,6 +81,7 @@
 		interactiveCard.addEventListener('clear', e=> { console.log('CLEAR', e.detail); });
 		interactiveCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
 		interactiveCard.addEventListener('delete', e=> { console.log('DELETE', e.detail); });
+		interactiveCard.addEventListener('editing', e=> { console.log('editing', e.detail); });
 
 		let test = {}
 		test.givenName = 'Jose';

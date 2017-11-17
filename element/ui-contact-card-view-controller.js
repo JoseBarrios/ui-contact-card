@@ -95,6 +95,7 @@ class UIContactCard extends HTMLElement {
 	set editing(isEditing){
 		this.state.editing = isEditing;
 		this.render()
+		this._emitEvent('editing');
 	}
 
 	get hasName(){
@@ -528,7 +529,6 @@ class UIContactCard extends HTMLElement {
 	edit(e){
 		//Setter handles everything
 		this.editing = true;
-		this._emitEvent('editing');
 	}
 
 	clear(){
