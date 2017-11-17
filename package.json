@@ -1,6 +1,6 @@
 {
   "name": "ui-contact-card",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "A custom UI element for contact cards",
   "main": "index.js",
   "scripts": {
