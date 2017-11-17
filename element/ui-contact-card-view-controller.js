@@ -87,7 +87,7 @@ class UIContactCard extends HTMLElement {
 
 	get person(){ return this.model.person || {}; }
 	set person(value){
-		this.model.person = value;
+		this.model.person = value || this.model.person || {};
 		this.meta = this.model.person.meta;
 		this.waitForConnection().then(connected => {
 			if(this.editing){
@@ -199,9 +199,8 @@ class UIContactCard extends HTMLElement {
 		let doesNotHaveEmergencyContact = !hasEmergencyContact;
 		//If it doesn't have one, add it
 		if(doesNotHaveEmergencyContact){
-			this.person = {};
 			this.person.knows = [];
-			this.person.knows.push({});
+			this.person.knows.push({})
 		}
 		return this.person.knows[0];
 	}

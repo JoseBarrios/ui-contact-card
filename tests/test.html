@@ -86,15 +86,19 @@
 		interactiveCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
 
 		let update = getRandom(people);
-		update.knows = getRandom(people);
+		update.knows = [];
+		update.knows.push(getRandom(people));
+
 		interactiveCard.setAttribute('person', JSON.stringify(update));
 
 		update = getRandom(people);
-		update.knows = getRandom(people);
+		update.knows = [];
+		update.knows.push(getRandom(people));
 		card.setAttribute('person', JSON.stringify(update));
 
 		update = getRandom(people)
-		update.knows = getRandom(people);
+		update.knows = [];
+		update.knows.push(getRandom(people));
 		editableCard.setAttribute('person', JSON.stringify(update));
 
 		setInterval(e => {
@@ -107,14 +111,16 @@
 			people.push(blank);
 
 			let update = getRandom(people);
-			update.knows = getRandom(people);
+			update.knows = [];
+			update.knows.push(getRandom(people));
 			card.setAttribute('person', JSON.stringify(update));
 
 			update = getRandom(people)
-			update.knows = getRandom(people);
+			update.knows = [];
+			update.knows.push(getRandom(people));
 			editableCard.setAttribute('person', JSON.stringify(update));
 
-		}, 2000)
+		}, 1000)
 
 	});
 </script>
