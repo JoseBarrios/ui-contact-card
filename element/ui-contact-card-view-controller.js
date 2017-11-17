@@ -6,7 +6,7 @@ const uiContactCardTemplate = uiContactCardDoc.ownerDocument.querySelector('#ui-
 class UIContactCard extends HTMLElement {
 
 	static get observedAttributes(){
-		return ['person', 'edit', 'action'];
+		return ['person', 'edit', 'action', 'csrf'];
 	}
 
 	constructor(model){
@@ -285,6 +285,9 @@ class UIContactCard extends HTMLElement {
 			case 'action':
 				this.action = newVal;
 				break;
+			case 'csrf':
+				this.csrfToken = newVal;
+				break;
 			default:
 				console.warn(`Attribute ${attrName} is not handled, you should probably do that`);
 		}
@@ -293,6 +296,7 @@ class UIContactCard extends HTMLElement {
 	_initViewReferences(){
 		//VIEW
 		this.$form = this.shadowRoot.querySelector('form');
+		this.$csrfToken = this.shadowRoot.querySelector('#csrfToken');
 		this.$container = this.shadowRoot.querySelector('.container');
 		this.$editButton = this.shadowRoot.querySelector('#editButton');
 		this.$doneButton = this.shadowRoot.querySelector('#doneButton');
@@ -423,6 +427,7 @@ class UIContactCard extends HTMLElement {
 
 	_populateViewFields(){
 		this.$form.action = this.action;
+		this.$csrfToken.value = this.csrfToken;
 		this.$fullNameHeader.innerHTML = this.fullName || "New Contact";
 		this.$updatedOn.innerHTML = this.updatedOn || this.createdOn;;
 		this.$email.innerHTML = this.email || 'add email';
