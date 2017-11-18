@@ -696,15 +696,11 @@ class UIContactCard extends HTMLElement {
 
   updateTelephone(e, person, property, $error){
 
-		if(e.target.value.length > 10){
-			e.target.value = ""
-		}
-
 		e.target.classList.remove('error-input');
     if(e.inputType !== 'deleteContentBackward'){
 			e.target.classList.remove('error-input');
 			var telephone = e.target.value.replace(/\D/g, '');
-			$error.innerHTML = this.formatTelephoneNumber(e.target.value)
+			this.$telephoneError.innerHTML = this.formatTelephoneNumber(e.target.value)
 
 			var isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
 			var isNotBlank = !isBlank;
@@ -712,23 +708,22 @@ class UIContactCard extends HTMLElement {
 			var isNotValid = !isValid;
 			var lostFocus = e.type === 'focusout';
 
-      if(isValid){
+			if(isValid && lostFocus){
+        $error.innerHTML = '';
+				person.telephone = telephone;
+				this.updatedOn = Date.now();
+			} else if(isValid){
         $error.innerHTML = '';
 				e.target.value = this.formatTelephoneNumber(e.target.value)
-				person.telephone = telephone;
 				this.updatedOn = Date.now();
 			}
-			if(lostFocus && isValid){
-				person.telephone = telephone;
-				this.updatedOn = Date.now();
-			}
-			if(isNotValid && isNotBlank && lostFocus) {
-        e.target.classList.add('error-input');
-				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
-			}
+
 			if(isNotValid && lostFocus) {
         e.target.classList.add('error-input');
+				e.target.value = e.target.value.replace(/\D/g, '');
 				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
+			} else if(isNotValid) {
+				e.target.value = e.target.value.replace(/\D/g, '');
 			}
     }
   }
