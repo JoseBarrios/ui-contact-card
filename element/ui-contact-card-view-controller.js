@@ -341,14 +341,14 @@ class UIContactCard extends HTMLElement {
   	this.$familyNameInput.addEventListener('focusout', (e) => this.updateName(e, this.person, 'familyName', this.$familyNameError) );
 		this.$emailInput.addEventListener('keyup', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
 		this.$emailInput.addEventListener('focusout', (e) => this.updateEmail(e, this.person, 'email', this.$emailError) );
-		this.$telephoneInput.addEventListener('input', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
+		this.$telephoneInput.addEventListener('keyup', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
 		this.$telephoneInput.addEventListener('focusout', (e) => this.updateTelephone(e, this.person, 'telephone', this.$telephoneError) );
 
   	this.$emergencyGivenNameInput.addEventListener('keyup', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
   	this.$emergencyGivenNameInput.addEventListener('focusout', (e) => this.updateName(e, this.emergencyContact, 'givenName', this.$emergencyGivenNameError) );
   	this.$emergencyFamilyNameInput.addEventListener('keyup', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
   	this.$emergencyFamilyNameInput.addEventListener('focusout', (e) => this.updateName(e, this.emergencyContact, 'familyName', this.$emergencyFamilyNameError) );
-		this.$emergencyTelephoneInput.addEventListener('input', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
+		this.$emergencyTelephoneInput.addEventListener('keyup', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
 		this.$emergencyTelephoneInput.addEventListener('focusout', (e) => this.updateTelephone(e, this.emergencyContact, 'telephone', this.$emergencyTelephoneError) );
 
 		this.$emailActionButton.addEventListener('click', e => {
@@ -696,16 +696,16 @@ class UIContactCard extends HTMLElement {
 
   updateTelephone(e, person, property, $error){
 
+		if(e.target.value.length > 10){
+			e.target.value = ""
+		}
 
+		e.target.classList.remove('error-input');
     if(e.inputType !== 'deleteContentBackward'){
 			e.target.classList.remove('error-input');
 			var telephone = e.target.value.replace(/\D/g, '');
-			e.target.value = this.formatTelephoneNumber(e.target.value)
-			let numDigits = telephone.length;
-			numDigits += numDigits >= 6? 4 : 0;
-			numDigits += numDigits >= 3 && numDigits < 6? 3 : 0;
-			numDigits += numDigits < 3? 1 : 0;
-			e.target.setSelectionRange(numDigits,numDigits)
+			$error.innerHTML = this.formatTelephoneNumber(e.target.value)
+
 			var isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
 			var isNotBlank = !isBlank;
 			var isValid = this.telephoneRegex.test(e.target.value);
@@ -714,7 +714,7 @@ class UIContactCard extends HTMLElement {
 
       if(isValid){
         $error.innerHTML = '';
-        e.target.classList.remove('error-input');
+				e.target.value = this.formatTelephoneNumber(e.target.value)
 				person.telephone = telephone;
 				this.updatedOn = Date.now();
 			}
@@ -729,22 +729,6 @@ class UIContactCard extends HTMLElement {
 			if(isNotValid && lostFocus) {
         e.target.classList.add('error-input');
 				$error.innerHTML = 'must be ten digits long: (555) 555-5555';
-			}
-    }
-    //DELETING considers formatting
-    else {
-			console.log(e.target.value.length)
-      let value = e.target.value;
-      let lastIndex = value.length - 1;
-			switch(e.target.value.length){
-				case 10:
-        	e.target.value = value.substring(0, 9);
-					break;
-				case 6:
-        	e.target.value = value.substring(1, 4);
-					break;
-				default:
-					//Nothing
 			}
     }
   }
