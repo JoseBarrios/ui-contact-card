@@ -695,12 +695,12 @@ class UIContactCard extends HTMLElement {
 
 
   updateTelephone(e, person, property, $error){
+		console.log(e, person, property, $error)
 
-		e.target.classList.remove('error-input');
     if(e.inputType !== 'deleteContentBackward'){
 			e.target.classList.remove('error-input');
 			var telephone = e.target.value.replace(/\D/g, '');
-			this.$telephoneError.innerHTML = this.formatTelephoneNumber(e.target.value)
+			$error.innerHTML = this.formatTelephoneNumber(e.target.value)
 
 			var isBlank = (e.target.value === '' || e.target.value === null || typeof e.target.value === 'undefined');
 			var isNotBlank = !isBlank;
