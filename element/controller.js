@@ -1,7 +1,6 @@
 'use strict'
 
-const uiContactCardDoc = document._currentScript || document.currentScript;
-const uiContactCardTemplate = uiContactCardDoc.ownerDocument.querySelector('#ui-contact-card-view');
+import view from "./view.js"
 
 class UIContactCard extends HTMLElement {
 
@@ -11,15 +10,15 @@ class UIContactCard extends HTMLElement {
 
     constructor(model){
         super();
+
         this.model = model || {};
         //SET DEFAULTS, IF PERSON AND KNOWS DO NOT EXIST
         this.model.person = this.model.person || {};
         this.model.person.knows = this.model.person.knows || [];
         this.model.person.knows[0] = this.model.person.knows[0] || {};
 
-        const view = document.importNode(uiContactCardTemplate.content, true);
         this.shadowRoot = this.attachShadow({mode: 'open'});
-        this.shadowRoot.appendChild(view);
+        this.shadowRoot.appendChild(view.content.cloneNode(true));
 
         this.state = {};
         this.state.connected = false;
@@ -32,9 +31,7 @@ class UIContactCard extends HTMLElement {
         this.alphabeticalRegex = /^[A-z]+$/;
         this.emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         this.telephoneRegex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
-
-        this.instantiatedOn = Date.now();
-
+        this.instantiatedOn = this.model.createdOn || Date.now();
     }
 
     get shadowRoot(){return this._shadowRoot;}
@@ -531,6 +528,7 @@ class UIContactCard extends HTMLElement {
         this.editing = true;
     }
 
+    //Not working?
     clear(){
         this.person = {};
         this.$fullNameHeader.innerHTML = 'New Contact';

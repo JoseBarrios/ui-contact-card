@@ -1,8 +1,8 @@
-<script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.17/webcomponents-loader.js'></script>
+<meta name=viewport content="width=device-width, initial-scale=1">
 <link href="/vendors/google/fonts/roboto/Roboto-Regular.ttf" type="x-fonts-ttf">
 <link href="/vendors/fontawesome/css/all.min.css" rel="stylesheet" type="text/css">
-<link rel='import' href='../element/index.html'>
-<meta name=viewport content="width=device-width, initial-scale=1">
+<script src="/vendors/moment/moment.min.js"></script>
+<script type="module" src="../element/controller.js"></script>
 
 <body style="padding:0px;margin:0px;width:100%;height:100%;background-color:#e8ebf2">
 	<div style="width:80%;margin:10%;margin-top:2.5%;float:left">
@@ -20,7 +20,6 @@
 
 
 <script>
-	window.addEventListener('WebComponentsReady', function(e) {
 
 		let meta = {};
 		meta.updatedOn = 1510876570000;
@@ -92,21 +91,7 @@
 		test.knows.push(emergency)
 
 		interactiveCard.setAttribute('person', JSON.stringify(test));
-		interactiveCard.clear();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		//interactiveCard.clear();
 
 		let card = document.querySelector('#card');
 		let editableCard = document.querySelector('#editableCard');
@@ -150,5 +135,4 @@
 
 		}, 2000)
 
-	});
 </script>

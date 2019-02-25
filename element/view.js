@@ -1,6 +1,5 @@
-<template id="ui-contact-card-view">
-
-    <link href="/vendors/google/fonts/roboto/Roboto-Regular.ttf" type="x-fonts-ttf">
+const view = document.createElement("template");
+view.innerHTML = `
     <link href="/vendors/fontawesome/css/all.min.css" rel="stylesheet" type="text/css">
 
     <style>
@@ -403,7 +402,6 @@
             </form> <!--FORM END-->
         </div> <!--DETAILS CONTAINER-->
     </div> <!--CARD CONTAINER-->
-</template>
+`;
 
-<script type="text/javascript" src="ui-contact-card-data-controller.js"> </script>
-<script type="text/javascript" src="ui-contact-card-view-controller.js"> </script>
+export default view;

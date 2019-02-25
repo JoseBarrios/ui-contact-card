@@ -1,12 +1,11 @@
 {
   "name": "ui-contact-card",
-  "version": "0.0.40",
+  "version": "1.0.0",
   "description": "A custom UI element for contact cards",
   "main": "index.js",
   "scripts": {
-    "build": "./node_modules/webpack/bin/webpack.js",
-    "test": "npm run-script build; ./node_modules/http-server/bin/http-server",
-    "start": "npm test"
+    "test": "./node_modules/http-server/bin/http-server",
+    "start": "npm install; npm test"
   },
   "repository": {
     "type": "git",
@@ -14,10 +13,11 @@
   },
   "keywords": [
     "custom",
+    "contact",
+    "card",
     "element",
     "class"
   ],
-  "browser": "browser.js",
   "author": "JoseBarrios",
   "license": "UNLICENSED",
   "bugs": {
@@ -25,12 +25,6 @@
   },
   "homepage": "https://github.com/JoseBarrios/ui-contact-card#readme",
   "devDependencies": {
-    "http-server": "^0.10.0",
-    "mocha": "^3.4.2",
-    "webpack": "^3.3.0"
-  },
-  "dependencies": {
-    "browser-request": "^0.3.3",
-    "moment": "^2.19.2"
+    "http-server": "^0.10.0"
   }
 }
