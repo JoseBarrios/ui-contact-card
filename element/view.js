@@ -1,11 +1,12 @@
 const view = document.createElement("template");
 view.innerHTML = `
-    <link href="/vendors/fontawesome/css/all.min.css" rel="stylesheet" type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" />
 
     <style>
-
         * {
-            font-family:'Roboto',sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
 
         .host {
@@ -268,7 +269,7 @@ view.innerHTML = `
                     <!--<p id="deleteActionLabel" class="host action-label danger-label">delete</p>-->
                     <!--</div> [>Delete Action<]-->
                 <div id="telephoneActionButton" class="host action-button">
-                    <span id="telephoneIcon" class="host action-icon fas fa-phone fa-2x"></span>
+                    <i id="telephoneIcon" class="host action-icon fas fa-phone fa-2x action-icon"></i>
                     <p id="telephoneActionLabel" class="host action-label">phone</p>
                 </div> <!--Telephone Action-->
                 <div id="emailActionButton" class="host action-button">

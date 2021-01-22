@@ -1,138 +1,46 @@
-<meta name=viewport content="width=device-width, initial-scale=1">
-<link href="/vendors/google/fonts/roboto/Roboto-Regular.ttf" type="x-fonts-ttf">
-<link href="/vendors/fontawesome/css/all.min.css" rel="stylesheet" type="text/css">
-<script src="/vendors/moment/moment.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
+/>
+
 <script type="module" src="../element/controller.js"></script>
 
-<body style="padding:0px;margin:0px;width:100%;height:100%;background-color:#e8ebf2">
-	<div style="width:80%;margin:10%;margin-top:2.5%;float:left">
-		<ui-contact-card id="interactiveCard"></ui-contact-card>
-	</div>
-
-	<div style="width:40%;margin:5%;margin-top:2.5%;float:left">
-		<ui-contact-card id="card" ></ui-contact-card>
-	</div>
-	<div style="width:40%;margin:5%;margin-top:2.5%;float:left">
-		<ui-contact-card id="editableCard" edit="true"></ui-contact-card>
-	</div>
-
+<body
+  style="
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: #e8ebf2;
+  "
+>
+  <div style="width: 90%; margin: 5%; margin-top: 2.5%; float: left">
+    <ui-contact-card></ui-contact-card>
+  </div>
 </body>
 
-
 <script>
+  let meta = {};
+  meta.updatedOn = 1510876570000;
+  meta.createdOn = 1510876560000;
 
-		let meta = {};
-		meta.updatedOn = 1510876570000;
-		meta.createdOn = 1510876560000;
+  let camille = {};
+  camille.givenName = "camille";
+  camille.familyName = "barrios";
+  camille.telephone = "2061234567";
+  camille.email = "camille@email.com";
+  camille.meta = meta;
 
-		let camille = {};
-		camille.givenName = 'camille';
-		camille.familyName = 'barrios';
-		camille.telephone = '2061234567';
-		camille.email = "camille@email.com";
-		camille.meta = meta;
+  let jose = {};
+  jose.givenName = "jose";
+  jose.familyName = "barrios";
+  jose.telephone = "2505888968";
+  jose.email = "jose@barrios.com";
+  jose.meta = meta;
+  jose.knows = [camille];
 
-		let jose = {};
-		jose.givenName = 'jose';
-		jose.familyName = 'barrios';
-		jose.telephone = '2505888968';
-		camille.email = "jose@barrios.com";
-
-
-		let sahand = {};
-		sahand.givenName = 'sahand';
-		sahand.familyName = 'saba';
-		jose.telephone = '2505888968';
-
-		let dylan = {};
-		dylan.givenName = 'dylan';
-		sahand.familyName = 'hardie';
-
-		let kelly = {};
-		kelly.givenName = 'Kelly';
-
-		let blank = {};
-
-		let empty = null;
-
-		var people = [];
-		people.push(jose);
-		people.push(camille);
-		people.push(sahand);
-		people.push(dylan);
-		people.push(blank);
-		people.push(blank);
-		//people.push(empty);
-
-		function getRandom(array) {
-			let randomIndex = Math.floor(Math.random() * (array.length)) + 0;
-			let person = array.splice(randomIndex, 1)[0];
-			return JSON.parse(JSON.stringify(person));
-		}
-
-		let interactiveCard = document.querySelector('#interactiveCard');
-		interactiveCard.addEventListener('clear', e=> { console.log('CLEAR', e.detail); });
-		interactiveCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
-		interactiveCard.addEventListener('delete', e=> { console.log('DELETE', e.detail); });
-		interactiveCard.addEventListener('editing', e=> { console.log('editing', e.detail); });
-
-		let test = {}
-		test.givenName = 'Jose';
-		test.familyName = 'Barrios';
-		test.telephone = 1231231234;
-		test.email = 'jose@barrios.io';
-		test.knows = [];
-
-		let emergency = {}
-		emergency.givenName = 'Jose';
-		emergency.familyName = 'Barrios';
-		emergency.telephone = 1231231234;
-		emergency.email = 'jose@barrios.io';
-		test.knows.push(emergency)
-
-		interactiveCard.setAttribute('person', JSON.stringify(test));
-		//interactiveCard.clear();
-
-		let card = document.querySelector('#card');
-		let editableCard = document.querySelector('#editableCard');
-
-		//TODO
-		card.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
-		editableCard.addEventListener('update', e=> { console.log('UPDATE', e.detail); });
-
-		let update = getRandom(people);
-		update.knows = [];
-		update.knows.push(getRandom(people));
-
-		update = getRandom(people);
-		update.knows = [];
-		update.knows.push(getRandom(people));
-		card.setAttribute('person', JSON.stringify(update));
-
-		update = getRandom(people)
-		update.knows = [];
-		update.knows.push(getRandom(people));
-		editableCard.setAttribute('person', JSON.stringify(update));
-
-		setInterval(e => {
-			var people = [];
-			people.push(jose);
-			people.push(camille);
-			people.push(sahand);
-			people.push(dylan);
-			people.push(blank);
-			people.push(blank);
-
-			let update = getRandom(people);
-			update.knows = [];
-			update.knows.push(getRandom(people));
-			card.setAttribute('person', JSON.stringify(update));
-
-			update = getRandom(people)
-			update.knows = [];
-			update.knows.push(getRandom(people));
-			editableCard.setAttribute('person', JSON.stringify(update));
-
-		}, 2000)
-
+  let card = document.querySelector("ui-contact-card");
+  card.setAttribute("person", JSON.stringify(jose));
 </script>
