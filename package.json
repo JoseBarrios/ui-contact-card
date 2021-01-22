@@ -26,8 +26,5 @@
   "homepage": "https://github.com/JoseBarrios/ui-contact-card#readme",
   "devDependencies": {
     "http-server": "^0.12.3"
-  },
-  "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.34"
   }
 }
